@@ -91,8 +91,8 @@ const CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = ({
                   wrapperStyle={{
                     fontSize: '0.7rem',
                     display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
+                    justifyContent: 'flex-start',
+                    alignItems: 'flex-start',
                     flexWrap: 'wrap',
                     gap: '8px',
                     paddingTop: '8px'
@@ -114,13 +114,13 @@ const CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = ({
           <Table size="small" sx={{ width: '100%' }}>
             <TableHead sx={{ backgroundColor: '#f5f5f5', position: 'sticky', top: 0 }}>
               <TableRow sx={{ height: '32px' }}>
-                <TableCell sx={{ fontWeight: 'bold', width: '50%', padding: '4px 8px', fontSize: '0.75rem' }}>
+                <TableCell sx={{ fontWeight: 'bold', width: '60%', padding: '4px 8px', fontSize: '0.75rem', textAlign: 'left' }}>
                   Category
                 </TableCell>
-                <TableCell align="right" sx={{ fontWeight: 'bold', width: '30%', padding: '4px 8px', fontSize: '0.75rem' }}>
+                <TableCell sx={{ fontWeight: 'bold', width: '25%', padding: '4px 8px', fontSize: '0.75rem', textAlign: 'left' }}>
                   Amount
                 </TableCell>
-                <TableCell align="right" sx={{ fontWeight: 'bold', width: '20%', padding: '4px 8px', fontSize: '0.75rem' }}>
+                <TableCell sx={{ fontWeight: 'bold', width: '15%', padding: '4px 8px', fontSize: '0.75rem', textAlign: 'left' }}>
                   %
                 </TableCell>
               </TableRow>
@@ -147,26 +147,26 @@ const CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = ({
                       <span style={{
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
-                        maxWidth: '80px',
+                        maxWidth: '100px',
                         whiteSpace: 'nowrap'
                       }}>
                         {item.category}
                       </span>
                     </Box>
                   </TableCell>
-                  <TableCell align="right" sx={{
+                  <TableCell sx={{
                     padding: '4px 8px',
                     fontSize: '0.7rem',
                     verticalAlign: 'middle',
-                    textAlign: 'right'
+                    textAlign: 'left'
                   }}>
                     {formatCurrency(item.amount)}
                   </TableCell>
-                  <TableCell align="right" sx={{
+                  <TableCell sx={{
                     padding: '4px 8px',
                     fontSize: '0.7rem',
                     verticalAlign: 'middle',
-                    textAlign: 'right'
+                    textAlign: 'left'
                   }}>
                     {item.percentage.toFixed(1)}%
                   </TableCell>
