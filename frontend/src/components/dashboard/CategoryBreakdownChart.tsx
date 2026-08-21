@@ -60,7 +60,7 @@ const CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = ({
       <Box sx={{
         display: 'grid',
         gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
-        gap: isMobile ? 1.5 : 2.5,
+        gap: isMobile ? 1.5 : 4,
         alignItems: 'start'
       }}>
         {/* Pie Chart */}
@@ -69,16 +69,16 @@ const CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = ({
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            minHeight: isMobile ? 140 : 160
+            minHeight: isMobile ? 110 : 130
           }}>
-            <ResponsiveContainer width="100%" height={isMobile ? 140 : 160}>
+            <ResponsiveContainer width="100%" height={isMobile ? 110 : 130}>
               <PieChart>
                 <Pie
                   data={chartData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={isMobile ? 20 : 25}
-                  outerRadius={isMobile ? 40 : 50}
+                  innerRadius={isMobile ? 15 : 18}
+                  outerRadius={isMobile ? 35 : 42}
                   paddingAngle={1}
                   dataKey="value"
                 >
@@ -136,7 +136,7 @@ const CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = ({
         {/* Table */}
         <Box sx={{
           overflowX: 'auto',
-          minHeight: isMobile ? 'auto' : 160
+          minHeight: isMobile ? 'auto' : 130
         }}>
           <Table size="small" sx={{ width: '100%' }}>
             <TableHead sx={{ backgroundColor: '#f5f5f5', position: 'sticky', top: 0 }}>
