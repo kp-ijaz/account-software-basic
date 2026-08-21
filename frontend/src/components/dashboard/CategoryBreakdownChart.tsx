@@ -68,17 +68,17 @@ const CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = ({
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          minHeight: isMobile ? 180 : 220
+          minHeight: isMobile ? 140 : 160
         }}>
-          <ResponsiveContainer width="100%" height={isMobile ? 180 : 220}>
+          <ResponsiveContainer width="100%" height={isMobile ? 140 : 160}>
             <PieChart>
               <Pie
                 data={chartData}
                 cx="50%"
                 cy="50%"
-                innerRadius={isMobile ? 30 : 40}
-                outerRadius={isMobile ? 55 : 70}
-                paddingAngle={1.5}
+                innerRadius={isMobile ? 20 : 25}
+                outerRadius={isMobile ? 40 : 50}
+                paddingAngle={1}
                 dataKey="value"
               >
                 {data.map((_entry, index) => (
@@ -86,7 +86,7 @@ const CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = ({
                 ))}
               </Pie>
               <Tooltip formatter={(value: any) => formatCurrency(value)} />
-              {!isMobile && <Legend wrapperStyle={{ fontSize: '0.75rem' }} />}
+              {!isMobile && <Legend wrapperStyle={{ fontSize: '0.7rem' }} />}
             </PieChart>
           </ResponsiveContainer>
         </Box>
@@ -94,7 +94,7 @@ const CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = ({
         {/* Table */}
         <Box sx={{
           overflowX: 'auto',
-          minHeight: isMobile ? 'auto' : 220
+          minHeight: isMobile ? 'auto' : 160
         }}>
           <Table size="small" sx={{ width: '100%' }}>
             <TableHead sx={{ backgroundColor: '#f5f5f5', position: 'sticky', top: 0 }}>
