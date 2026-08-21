@@ -1,0 +1,31 @@
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    port: 3000,
+    strictPort: false,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '/api'),
+      },
+    },
+  },
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendors': ['react', 'react-dom', 'react-router-dom'],
+          'mui-vendors': ['@mui/material', '@emotion/react', '@emotion/styled'],
+          'state-management': ['react-redux', '@reduxjs/toolkit', 'redux-persist'],
+        },
+      },
+    },
+  },
+})

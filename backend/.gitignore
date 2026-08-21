@@ -1,66 +1,38 @@
-# Build results
-[Dd]ebug/
-[Dd]ebugPublic/
-[Rr]elease/
-[Rr]eleases/
-x64/
-x86/
-[Ww][Ii][Nn]32/
-[Aa][Rr][Mm]/
-[Aa][Rr][Mm]64/
-bld/
-[Bb]in/
-[Oo]bj/
-[Ll]og/
-[Ll]ogs/
+# Dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
 
-# Visual Studio cache/options directory
-.vs/
+# Build
+dist/
+build/
+*.tsbuildinfo
 
-# Visual Studio Code
-.vscode/
-*.code-workspace
-
-# Rider
-.idea/
-*.sln.iml
-
-# User-specific files
-*.rsuser
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
-
-# Environment variables
+# Environment
 .env
 .env.local
 .env.*.local
-appsettings.local.json
 
-# Database migrations
-Migrations/*/
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+.DS_Store
 
 # Logs
 logs/
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
 
-# NuGet
-*.nupkg
-*.snupkg
-.nuget/
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# Database files
-*.db
+# Database
 *.sqlite
-*.sqlite3
+*.db
 
-# Editor settings
-.editorconfig
+# Testing
+coverage/
+.nyc_output/
+
+# Temporary
+tmp/
+temp/

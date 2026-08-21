@@ -1,0 +1,141 @@
+// Prisma Schema - Madrasa Accounting Software
+// This is your Prisma schema file
+// Learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Admin User Model
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  username      String    @unique
+  passwordHash  String
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  auditLogs     AuditLog[]
+
+  @@index([email])
+  @@index([username])
+}
+
+// Madrasa Settings
+model Settings {
+  id                String    @id @default(cuid())
+  madrasaName       String    @default("Madrasa")
+  logo              String?   // URL or base64
+  address           String?
+  phone             String?
+  email             String?
+  currency          String    @default("USD")
+  currencySymbol    String    @default("$")
+  financialYearStart Int      @default(1)  // 1-12 (month)
+  openingBalance    Decimal   @db.Decimal(15, 2) @default(0)
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+// Income Category
+model IncomeCategory {
+  id            String    @id @default(cuid())
+  name          String    @unique
+  description   String?
+  isDefault     Boolean   @default(false)
+  isActive      Boolean   @default(true)
+  order         Int       @default(0)
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  transactions  Transaction[]
+
+  @@index([name])
+  @@index([isActive])
+}
+
+// Expense Category
+model ExpenseCategory {
+  id            String    @id @default(cuid())
+  name          String    @unique
+  description   String?
+  isDefault     Boolean   @default(false)
+  isActive      Boolean   @default(true)
+  order         Int       @default(0)
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  transactions  Transaction[]
+
+  @@index([name])
+  @@index([isActive])
+}
+
+// Transaction (Income or Expense)
+model Transaction {
+  id                String      @id @default(cuid())
+  type              String      // "INCOME" or "EXPENSE"
+  date              DateTime    @db.Date
+  description       String
+  amount            Decimal     @db.Decimal(15, 2)
+  paymentMethod     String      // "CASH" or "BANK"
+  reference         String?     // Check number, receipt number, etc.
+
+  // Income Category (optional)
+  incomeCategoryId  String?
+  incomeCategory    IncomeCategory?   @relation(fields: [incomeCategoryId], references: [id], onDelete: SetNull)
+
+  // Expense Category (optional)
+  expenseCategoryId String?
+  expenseCategory   ExpenseCategory?  @relation(fields: [expenseCategoryId], references: [id], onDelete: SetNull)
+
+  notes             String?
+
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  auditLogs         AuditLog[]
+
+  @@index([date])
+  @@index([type])
+  @@index([incomeCategoryId])
+  @@index([expenseCategoryId])
+  @@index([paymentMethod])
+}
+
+// Audit Log - Track all changes
+model AuditLog {
+  id            String    @id @default(cuid())
+  action        String    // LOGIN, LOGOUT, CREATE, UPDATE, DELETE, etc.
+  description   String
+  userId        String?
+  user          User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  tableName     String?   // Which table was affected
+  recordId      String?   // Which record was affected
+
+  oldValues     Json?     // Previous values (for updates/deletes)
+  newValues     Json?     // New values (for creates/updates)
+
+  transactionId String?
+  transaction   Transaction? @relation(fields: [transactionId], references: [id], onDelete: SetNull)
+
+  ipAddress     String?
+  userAgent     String?
+
+  createdAt     DateTime  @default(now())
+
+  @@index([action])
+  @@index([createdAt])
+  @@index([userId])
+  @@index([tableName])
+}
