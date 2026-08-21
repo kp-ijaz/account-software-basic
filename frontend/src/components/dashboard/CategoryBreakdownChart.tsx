@@ -1,6 +1,6 @@
 import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
-import { Paper, Box, Typography, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
+import { Paper, Box, Typography, Table, TableBody, TableCell, TableHead, TableRow, useMediaQuery, useTheme } from '@mui/material';
 import { CategoryBreakdown } from '../../types/dashboard';
 
 interface CategoryBreakdownChartProps {
@@ -25,6 +25,9 @@ const CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = ({
   title,
   type,
 }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -54,21 +57,29 @@ const CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = ({
         {title}
       </Typography>
 
-      <Box sx={{ display: 'flex', gap: 3 }}>
+      <Box sx={{
+        display: 'flex',
+        flexDirection: isMobile ? 'column' : 'row',
+        gap: 3
+      }}>
         {/* Pie Chart */}
-        <Box sx={{ flex: 1, minHeight: 300 }}>
-          <ResponsiveContainer width="100%" height={300}>
+        <Box sx={{
+          flex: isMobile ? '0 0 auto' : 1,
+          minHeight: isMobile ? 250 : 300,
+          width: isMobile ? '100%' : 'auto'
+        }}>
+          <ResponsiveContainer width="100%" height={isMobile ? 250 : 300}>
             <PieChart>
               <Pie
                 data={chartData}
                 cx="50%"
                 cy="50%"
-                innerRadius={60}
-                outerRadius={100}
+                innerRadius={isMobile ? 40 : 60}
+                outerRadius={isMobile ? 70 : 100}
                 paddingAngle={2}
                 dataKey="value"
               >
-                {data.map((entry, index) => (
+                {data.map((_entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
@@ -79,7 +90,12 @@ const CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = ({
         </Box>
 
         {/* Table */}
-        <Box sx={{ flex: 1, overflowY: 'auto', maxHeight: 300 }}>
+        <Box sx={{
+          flex: isMobile ? '0 0 auto' : 1,
+          overflowY: 'auto',
+          maxHeight: isMobile ? 'auto' : 300,
+          width: isMobile ? '100%' : 'auto'
+        }}>
           <Table size="small">
             <TableHead sx={{ backgroundColor: '#f5f5f5' }}>
               <TableRow>
