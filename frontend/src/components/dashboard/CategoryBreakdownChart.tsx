@@ -52,30 +52,32 @@ const CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = ({
   }));
 
   return (
-    <Paper sx={{ p: 2 }}>
-      <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
+    <Paper sx={{ p: 3 }}>
+      <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 3 }}>
         {title}
       </Typography>
 
       <Box sx={{
-        display: 'flex',
-        flexDirection: isMobile ? 'column' : 'row',
-        gap: 3
+        display: 'grid',
+        gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+        gap: isMobile ? 2 : 4,
+        alignItems: 'start'
       }}>
         {/* Pie Chart */}
         <Box sx={{
-          flex: isMobile ? '0 0 auto' : 1,
-          minHeight: isMobile ? 250 : 300,
-          width: isMobile ? '100%' : 'auto'
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: isMobile ? 250 : 320
         }}>
-          <ResponsiveContainer width="100%" height={isMobile ? 250 : 300}>
+          <ResponsiveContainer width="100%" height={isMobile ? 250 : 320}>
             <PieChart>
               <Pie
                 data={chartData}
                 cx="50%"
                 cy="50%"
                 innerRadius={isMobile ? 40 : 60}
-                outerRadius={isMobile ? 70 : 100}
+                outerRadius={isMobile ? 70 : 90}
                 paddingAngle={2}
                 dataKey="value"
               >
@@ -84,30 +86,28 @@ const CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = ({
                 ))}
               </Pie>
               <Tooltip formatter={(value: any) => formatCurrency(value)} />
-              <Legend />
+              {!isMobile && <Legend />}
             </PieChart>
           </ResponsiveContainer>
         </Box>
 
         {/* Table */}
         <Box sx={{
-          flex: isMobile ? '0 0 auto' : 1,
-          overflowY: 'auto',
-          maxHeight: isMobile ? 'auto' : 300,
-          width: isMobile ? '100%' : 'auto'
+          overflowX: 'auto',
+          minHeight: isMobile ? 'auto' : 320
         }}>
-          <Table size="small">
-            <TableHead sx={{ backgroundColor: '#f5f5f5' }}>
+          <Table size={isMobile ? 'small' : 'medium'} sx={{ width: '100%' }}>
+            <TableHead sx={{ backgroundColor: '#f5f5f5', position: 'sticky', top: 0 }}>
               <TableRow>
-                <TableCell><strong>Category</strong></TableCell>
-                <TableCell align="right"><strong>Amount</strong></TableCell>
-                <TableCell align="right"><strong>%</strong></TableCell>
+                <TableCell sx={{ fontWeight: 'bold', width: '50%' }}>Category</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 'bold', width: '30%' }}>Amount</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 'bold', width: '20%' }}>%</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {data.map((item, index) => (
-                <TableRow key={item.category}>
-                  <TableCell>
+                <TableRow key={item.category} hover>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>
                     <Box display="flex" alignItems="center" gap={1}>
                       <Box
                         sx={{
@@ -115,13 +115,20 @@ const CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = ({
                           height: 12,
                           borderRadius: '50%',
                           backgroundColor: COLORS[index % COLORS.length],
+                          flexShrink: 0,
                         }}
                       />
-                      {item.category}
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {item.category}
+                      </span>
                     </Box>
                   </TableCell>
-                  <TableCell align="right">{formatCurrency(item.amount)}</TableCell>
-                  <TableCell align="right">{item.percentage.toFixed(1)}%</TableCell>
+                  <TableCell align="right" sx={{ fontSize: isMobile ? '0.75rem' : '0.875rem' }}>
+                    {formatCurrency(item.amount)}
+                  </TableCell>
+                  <TableCell align="right" sx={{ fontSize: isMobile ? '0.75rem' : '0.875rem' }}>
+                    {item.percentage.toFixed(1)}%
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
