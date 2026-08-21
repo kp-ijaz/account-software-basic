@@ -19,7 +19,7 @@ export interface Expense {
 export interface CreateExpenseInput {
   date: string;
   categoryId: string;
-  description: string;
+  description?: string;
   amount: number;
   paymentMethod: 'CASH' | 'BANK';
   reference?: string;

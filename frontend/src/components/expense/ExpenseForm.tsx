@@ -130,7 +130,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ open, onClose, onSuccess, exp
 
   const handleSubmit = async () => {
     try {
-      if (!formData.categoryId || !formData.description || formData.amount <= 0) {
+      if (!formData.categoryId || formData.amount <= 0) {
         setError('Please fill in all required fields');
         return;
       }
@@ -198,7 +198,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ open, onClose, onSuccess, exp
         </Box>
 
         <TextField
-          label="Description"
+          label="Description (Optional)"
           value={formData.description}
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
           fullWidth
@@ -212,7 +212,11 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ open, onClose, onSuccess, exp
           type="number"
           inputProps={{ step: '0.01', min: '0' }}
           value={formData.amount}
-          onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) })}
+          onChange={(e) => {
+            const value = e.target.value;
+            const amount = value === '' ? 0 : parseFloat(value);
+            setFormData({ ...formData, amount: isNaN(amount) ? 0 : amount });
+          }}
           fullWidth
           sx={{ mb: 2 }}
         />
