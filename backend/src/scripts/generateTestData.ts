@@ -104,7 +104,7 @@ async function generateTestData() {
             date,
             incomeCategoryId: incomeCategories[categoryIdx].id,
             description: `Income: ${incomeCategories[categoryIdx].name}`,
-            amount: new (require('decimal.js')).default(amount),
+            amount,
             paymentMethod: Math.random() > 0.5 ? 'CASH' : 'BANK',
           },
         });
@@ -126,7 +126,7 @@ async function generateTestData() {
             date,
             expenseCategoryId: expenseCategories[categoryIdx].id,
             description: `Expense: ${expenseCategories[categoryIdx].name}`,
-            amount: new (require('decimal.js')).default(amount),
+            amount,
             paymentMethod: Math.random() > 0.5 ? 'CASH' : 'BANK',
           },
         });
