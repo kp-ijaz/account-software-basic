@@ -185,8 +185,8 @@ const ReportsPage: React.FC = () => {
         </Box>
       )}
 
-      {/* Monthly Report Tab - Show on mobile with tab or on desktop when selected */}
-      {(isMobile && tabValue === 0) || (!isMobile && tabValue === 0) ? (
+      {/* Monthly Report - Show when selected (tabValue === 0) */}
+      {tabValue === 0 && (
       <Box>
         {/* Month/Year Selection */}
         <Grid container spacing={2} sx={{ mb: 3 }}>
@@ -257,10 +257,10 @@ const ReportsPage: React.FC = () => {
           <MonthlyReportView report={monthlyReport} />
         ) : null}
       </Box>
-      ) : null}
+      )}
 
-      {/* Yearly Report Tab - Show on mobile with tab */}
-      {isMobile && tabValue === 1 ? (
+      {/* Yearly Report - Show when selected (tabValue === 1) */}
+      {tabValue === 1 && (
       <Box>
         {/* Year Selection */}
         <Grid container spacing={2} sx={{ mb: 3 }}>
@@ -312,10 +312,10 @@ const ReportsPage: React.FC = () => {
           <YearlyReportView report={yearlyReport} />
         ) : null}
       </Box>
-      ) : null}
+      )}
 
-      {/* Balance Sheet Tab - Show on mobile with tab */}
-      {isMobile && tabValue === 2 ? (
+      {/* Balance Sheet - Show when selected (tabValue === 2) */}
+      {tabValue === 2 && (
       <Box>
         {/* Actions */}
         <Grid container spacing={2} sx={{ mb: 3 }}>
@@ -350,7 +350,7 @@ const ReportsPage: React.FC = () => {
           <BalanceSheetView balanceSheet={balanceSheet} />
         ) : null}
       </Box>
-      ) : null}
+      )}
     </Container>
   );
 };
