@@ -17,25 +17,14 @@ import {
   setLoading,
   setError,
   setIncomes,
-  addIncome,
   updateIncomeItem,
   removeIncome,
 } from '../store/slices/incomeSlice';
 import IncomeForm from '../components/income/IncomeForm';
 import IncomeTable from '../components/income/IncomeTable';
 import incomeService from '../services/incomeService';
+import categoryService from '../services/categoryService';
 import { Income, IncomeCategory } from '../types/income';
-
-// Mock income categories - replace with API call
-const mockCategories: IncomeCategory[] = [
-  { id: '1', name: 'Student Fees' },
-  { id: '2', name: 'Donations' },
-  { id: '3', name: 'Zakat' },
-  { id: '4', name: 'Sadaqah' },
-  { id: '5', name: 'Sponsorship' },
-  { id: '6', name: 'Building Fund' },
-  { id: '7', name: 'Other Income' },
-];
 
 export default function IncomePage() {
   const dispatch = useDispatch();
@@ -46,11 +35,30 @@ export default function IncomePage() {
   const [formOpen, setFormOpen] = useState(false);
   const [selectedIncome, setSelectedIncome] = useState<Income | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [categories, setCategories] = useState<IncomeCategory[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
+
+  // Fetch categories on mount
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
   // Fetch incomes on mount and when filters change
   useEffect(() => {
     fetchIncomes();
   }, [page, pageSize]);
+
+  const fetchCategories = async () => {
+    try {
+      setCategoriesLoading(true);
+      const response = await categoryService.getIncomeCategories();
+      setCategories(response.data);
+    } catch (err) {
+      console.error('Failed to load categories:', err);
+    } finally {
+      setCategoriesLoading(false);
+    }
+  };
 
   const fetchIncomes = async () => {
     try {
@@ -92,9 +100,9 @@ export default function IncomePage() {
   const handleFormSuccess = (income: Income) => {
     if (selectedIncome) {
       dispatch(updateIncomeItem(income));
-    } else {
-      dispatch(addIncome(income));
     }
+    // Refresh the entire list to show new/updated items
+    fetchIncomes();
     handleFormClose();
   };
 
@@ -264,7 +272,7 @@ export default function IncomePage() {
       <IncomeForm
         open={formOpen}
         income={selectedIncome}
-        categories={mockCategories}
+        categories={categories}
         onClose={handleFormClose}
         onSuccess={handleFormSuccess}
         loading={loading}
