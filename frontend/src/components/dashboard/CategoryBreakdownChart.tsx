@@ -64,46 +64,73 @@ const CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = ({
         alignItems: 'start'
       }}>
         {/* Pie Chart */}
-        <Box sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: isMobile ? 140 : 160
-        }}>
-          <ResponsiveContainer width="100%" height={isMobile ? 140 : 160}>
-            <PieChart>
-              <Pie
-                data={chartData}
-                cx="50%"
-                cy="50%"
-                innerRadius={isMobile ? 20 : 25}
-                outerRadius={isMobile ? 40 : 50}
-                paddingAngle={1}
-                dataKey="value"
-              >
-                {data.map((_entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip formatter={(value: any) => formatCurrency(value)} />
-              {!isMobile && (
-                <Legend
-                  wrapperStyle={{
-                    fontSize: '0.7rem',
+        <Box>
+          <Box sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: isMobile ? 140 : 160
+          }}>
+            <ResponsiveContainer width="100%" height={isMobile ? 140 : 160}>
+              <PieChart>
+                <Pie
+                  data={chartData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={isMobile ? 20 : 25}
+                  outerRadius={isMobile ? 40 : 50}
+                  paddingAngle={1}
+                  dataKey="value"
+                >
+                  {data.map((_entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value: any) => formatCurrency(value)} />
+              </PieChart>
+            </ResponsiveContainer>
+          </Box>
+
+          {/* Custom Legend */}
+          {!isMobile && (
+            <Box sx={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2, 1fr)',
+              gap: '6px',
+              paddingTop: '8px',
+              fontSize: '0.7rem'
+            }}>
+              {data.map((item, index) => (
+                <Box
+                  key={item.category}
+                  sx={{
                     display: 'flex',
-                    justifyContent: 'flex-start',
-                    alignItems: 'flex-start',
-                    flexWrap: 'wrap',
-                    gap: '8px',
-                    paddingTop: '8px'
+                    alignItems: 'center',
+                    gap: '4px',
+                    padding: '2px 0'
                   }}
-                  iconType="circle"
-                  verticalAlign="bottom"
-                  height={30}
-                />
-              )}
-            </PieChart>
-          </ResponsiveContainer>
+                >
+                  <Box
+                    sx={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: '50%',
+                      backgroundColor: COLORS[index % COLORS.length],
+                      flexShrink: 0,
+                    }}
+                  />
+                  <span style={{
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    maxWidth: '90px'
+                  }}>
+                    {item.category}
+                  </span>
+                </Box>
+              ))}
+            </Box>
+          )}
         </Box>
 
         {/* Table */}
