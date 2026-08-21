@@ -86,7 +86,22 @@ const CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = ({
                 ))}
               </Pie>
               <Tooltip formatter={(value: any) => formatCurrency(value)} />
-              {!isMobile && <Legend wrapperStyle={{ fontSize: '0.7rem' }} />}
+              {!isMobile && (
+                <Legend
+                  wrapperStyle={{
+                    fontSize: '0.7rem',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: '8px',
+                    paddingTop: '8px'
+                  }}
+                  iconType="circle"
+                  verticalAlign="bottom"
+                  height={30}
+                />
+              )}
             </PieChart>
           </ResponsiveContainer>
         </Box>
@@ -112,8 +127,13 @@ const CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = ({
             </TableHead>
             <TableBody>
               {data.map((item, index) => (
-                <TableRow key={item.category} hover sx={{ height: '28px' }}>
-                  <TableCell sx={{ whiteSpace: 'nowrap', padding: '4px 8px', fontSize: '0.7rem' }}>
+                <TableRow key={item.category} hover sx={{ height: '28px', verticalAlign: 'middle' }}>
+                  <TableCell sx={{
+                    padding: '4px 8px',
+                    fontSize: '0.7rem',
+                    verticalAlign: 'middle',
+                    textAlign: 'left'
+                  }}>
                     <Box display="flex" alignItems="center" gap={0.5}>
                       <Box
                         sx={{
@@ -124,15 +144,30 @@ const CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = ({
                           flexShrink: 0,
                         }}
                       />
-                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '80px' }}>
+                      <span style={{
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        maxWidth: '80px',
+                        whiteSpace: 'nowrap'
+                      }}>
                         {item.category}
                       </span>
                     </Box>
                   </TableCell>
-                  <TableCell align="right" sx={{ padding: '4px 8px', fontSize: '0.7rem' }}>
+                  <TableCell align="right" sx={{
+                    padding: '4px 8px',
+                    fontSize: '0.7rem',
+                    verticalAlign: 'middle',
+                    textAlign: 'right'
+                  }}>
                     {formatCurrency(item.amount)}
                   </TableCell>
-                  <TableCell align="right" sx={{ padding: '4px 8px', fontSize: '0.7rem' }}>
+                  <TableCell align="right" sx={{
+                    padding: '4px 8px',
+                    fontSize: '0.7rem',
+                    verticalAlign: 'middle',
+                    textAlign: 'right'
+                  }}>
                     {item.percentage.toFixed(1)}%
                   </TableCell>
                 </TableRow>
