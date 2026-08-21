@@ -1,0 +1,53 @@
+# Flutter
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+build/
+*.apk
+*.ipa
+*.app
+*.aab
+*.symbol
+*.dill
+
+# Backend
+bin/
+obj/
+.vs/
+.vscode/
+*.dll
+*.exe
+*.so
+*.dylib
+*.runtimeconfig.json
+node_modules/
+
+# IDE
+.idea/
+*.swp
+*.swo
+*.iml
+*.sublime-workspace
+*.sublime-project
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+.project
+.classpath
+
+# Logs
+*.log
+logs/
+
+# Node
+npm-debug.log*
+yarn-debug.log*
+
+# Misc
+.flutter-settings
