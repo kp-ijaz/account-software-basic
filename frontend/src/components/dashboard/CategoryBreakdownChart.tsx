@@ -90,90 +90,72 @@ const CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = ({
                 <Legend
                   wrapperStyle={{
                     fontSize: '0.7rem',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    flexWrap: 'wrap',
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(2, 1fr)',
                     gap: '8px',
-                    paddingTop: '8px'
+                    paddingTop: '8px',
+                    width: '100%'
                   }}
                   iconType="circle"
                   verticalAlign="bottom"
-                  height={30}
+                  height={40}
                 />
               )}
             </PieChart>
           </ResponsiveContainer>
         </Box>
 
-        {/* Table */}
+        {/* Table Grid - 2 columns */}
         <Box sx={{
           overflowX: 'auto',
           minHeight: isMobile ? 'auto' : 160
         }}>
-          <Table size="small" sx={{ width: '100%' }}>
-            <TableHead sx={{ backgroundColor: '#f5f5f5', position: 'sticky', top: 0 }}>
-              <TableRow sx={{ height: '32px' }}>
-                <TableCell sx={{ fontWeight: 'bold', width: '50%', padding: '4px 8px', fontSize: '0.75rem' }}>
-                  Category
-                </TableCell>
-                <TableCell align="right" sx={{ fontWeight: 'bold', width: '30%', padding: '4px 8px', fontSize: '0.75rem' }}>
-                  Amount
-                </TableCell>
-                <TableCell align="right" sx={{ fontWeight: 'bold', width: '20%', padding: '4px 8px', fontSize: '0.75rem' }}>
-                  %
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {data.map((item, index) => (
-                <TableRow key={item.category} hover sx={{ height: '28px', verticalAlign: 'middle' }}>
-                  <TableCell sx={{
-                    padding: '4px 8px',
-                    fontSize: '0.7rem',
-                    verticalAlign: 'middle',
-                    textAlign: 'left'
+          <Box sx={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: '8px',
+            fontSize: '0.7rem'
+          }}>
+            {data.map((item, index) => (
+              <Box
+                key={item.category}
+                sx={{
+                  padding: '6px 8px',
+                  backgroundColor: index % 2 === 0 ? '#fafafa' : '#ffffff',
+                  borderRadius: '4px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '2px',
+                  minHeight: '40px',
+                  justifyContent: 'center'
+                }}
+              >
+                <Box display="flex" alignItems="center" gap={0.5}>
+                  <Box
+                    sx={{
+                      width: 10,
+                      height: 10,
+                      borderRadius: '50%',
+                      backgroundColor: COLORS[index % COLORS.length],
+                      flexShrink: 0,
+                    }}
+                  />
+                  <span style={{
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    fontWeight: 500
                   }}>
-                    <Box display="flex" alignItems="center" gap={0.5}>
-                      <Box
-                        sx={{
-                          width: 10,
-                          height: 10,
-                          borderRadius: '50%',
-                          backgroundColor: COLORS[index % COLORS.length],
-                          flexShrink: 0,
-                        }}
-                      />
-                      <span style={{
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        maxWidth: '80px',
-                        whiteSpace: 'nowrap'
-                      }}>
-                        {item.category}
-                      </span>
-                    </Box>
-                  </TableCell>
-                  <TableCell align="right" sx={{
-                    padding: '4px 8px',
-                    fontSize: '0.7rem',
-                    verticalAlign: 'middle',
-                    textAlign: 'right'
-                  }}>
-                    {formatCurrency(item.amount)}
-                  </TableCell>
-                  <TableCell align="right" sx={{
-                    padding: '4px 8px',
-                    fontSize: '0.7rem',
-                    verticalAlign: 'middle',
-                    textAlign: 'right'
-                  }}>
-                    {item.percentage.toFixed(1)}%
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                    {item.category}
+                  </span>
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: '#666' }}>
+                  <span>{formatCurrency(item.amount)}</span>
+                  <span>{item.percentage.toFixed(1)}%</span>
+                </Box>
+              </Box>
+            ))}
+          </Box>
         </Box>
       </Box>
     </Paper>
