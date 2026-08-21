@@ -159,8 +159,34 @@ const ReportsPage: React.FC = () => {
         </Paper>
       )}
 
-      {/* Monthly Report Tab - Show on mobile with tab or on desktop always */}
-      {(isMobile && tabValue === 0) || !isMobile ? (
+      {/* Report Selection on Desktop */}
+      {!isMobile && (
+        <Box sx={{ mb: 3 }}>
+          <Button
+            variant={tabValue === 0 ? 'contained' : 'outlined'}
+            onClick={() => setTabValue(0)}
+            sx={{ mr: 1 }}
+          >
+            Monthly Report
+          </Button>
+          <Button
+            variant={tabValue === 1 ? 'contained' : 'outlined'}
+            onClick={() => setTabValue(1)}
+            sx={{ mr: 1 }}
+          >
+            Yearly Report
+          </Button>
+          <Button
+            variant={tabValue === 2 ? 'contained' : 'outlined'}
+            onClick={() => setTabValue(2)}
+          >
+            Balance Sheet
+          </Button>
+        </Box>
+      )}
+
+      {/* Monthly Report Tab - Show on mobile with tab or on desktop when selected */}
+      {(isMobile && tabValue === 0) || (!isMobile && tabValue === 0) ? (
       <Box>
         {/* Month/Year Selection */}
         <Grid container spacing={2} sx={{ mb: 3 }}>
