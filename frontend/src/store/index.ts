@@ -10,6 +10,7 @@ import dashboardReducer from './slices/dashboardSlice';
 import reportReducer from './slices/reportSlice';
 import auditReducer from './slices/auditSlice';
 import settingsReducer from './slices/settingsSlice';
+import categoryReducer from './slices/categorySlice';
 
 const persistConfig = {
   key: 'root',
@@ -30,6 +31,7 @@ export const store = configureStore({
     reports: reportReducer,
     audit: auditReducer,
     settings: settingsReducer,
+    categories: categoryReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

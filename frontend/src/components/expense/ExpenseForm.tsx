@@ -13,9 +13,12 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  IconButton,
 } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 import { CreateExpenseInput, Expense, ExpenseCategory } from '../../types/expense';
 import expenseService from '../../services/expenseService';
+import categoryService from '../../services/categoryService';
 
 interface ExpenseFormProps {
   open: boolean;
@@ -35,6 +38,11 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ open, onClose, onSuccess, exp
     amount: 0,
     paymentMethod: 'CASH',
   });
+  const [showCategoryDialog, setShowCategoryDialog] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [newCategoryDesc, setNewCategoryDesc] = useState('');
+  const [categoryCreating, setCategoryCreating] = useState(false);
+  const [categoryError, setCategoryError] = useState<string | null>(null);
 
   useEffect(() => {
     if (open) {
@@ -49,21 +57,43 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ open, onClose, onSuccess, exp
 
   const loadCategories = async () => {
     try {
-      // Categories would come from a backend endpoint
-      // For now, using default categories
-      setCategories([
-        { id: '1', name: 'Teacher Salary' },
-        { id: '2', name: 'Electricity' },
-        { id: '3', name: 'Water' },
-        { id: '4', name: 'Food' },
-        { id: '5', name: 'Maintenance' },
-        { id: '6', name: 'Stationery' },
-        { id: '7', name: 'Events' },
-        { id: '8', name: 'Building Maintenance' },
-        { id: '9', name: 'Miscellaneous' },
-      ]);
+      const response = await categoryService.getExpenseCategories();
+      setCategories(response.data as ExpenseCategory[]);
     } catch (err) {
       setError('Failed to load categories');
+    }
+  };
+
+  const handleCreateCategory = async () => {
+    try {
+      if (!newCategoryName.trim()) {
+        setCategoryError('Category name is required');
+        return;
+      }
+
+      setCategoryCreating(true);
+      setCategoryError(null);
+
+      const response = await categoryService.createExpenseCategory(
+        newCategoryName.trim(),
+        newCategoryDesc.trim()
+      );
+
+      // Add new category to the list
+      setCategories([...categories, response.data as ExpenseCategory]);
+
+      // Update form to select the new category
+      setFormData({ ...formData, categoryId: response.data.id });
+
+      // Reset dialog
+      setNewCategoryName('');
+      setNewCategoryDesc('');
+      setShowCategoryDialog(false);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to create category';
+      setCategoryError(message);
+    } finally {
+      setCategoryCreating(false);
     }
   };
 
@@ -140,21 +170,32 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ open, onClose, onSuccess, exp
           sx={{ mb: 2 }}
         />
 
-        <FormControl fullWidth sx={{ mb: 2 }}>
-          <InputLabel>Category</InputLabel>
-          <Select
-            value={formData.categoryId}
-            label="Category"
-            onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start', mb: 2 }}>
+          <FormControl fullWidth>
+            <InputLabel>Category</InputLabel>
+            <Select
+              value={formData.categoryId}
+              label="Category"
+              onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
+            >
+              <MenuItem value="">Select Category</MenuItem>
+              {categories.map((cat) => (
+                <MenuItem key={cat.id} value={cat.id}>
+                  {cat.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <IconButton
+            size="small"
+            onClick={() => setShowCategoryDialog(true)}
+            disabled={loading}
+            sx={{ mt: 1 }}
+            title="Add new category"
           >
-            <MenuItem value="">Select Category</MenuItem>
-            {categories.map((cat) => (
-              <MenuItem key={cat.id} value={cat.id}>
-                {cat.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+            <AddIcon />
+          </IconButton>
+        </Box>
 
         <TextField
           label="Description"
@@ -208,6 +249,67 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ open, onClose, onSuccess, exp
           {loading ? <CircularProgress size={24} /> : (expenseId ? 'Update' : 'Save')}
         </Button>
       </DialogActions>
+
+      {/* Add Category Dialog */}
+      <Dialog
+        open={showCategoryDialog}
+        onClose={() => {
+          setShowCategoryDialog(false);
+          setNewCategoryName('');
+          setNewCategoryDesc('');
+          setCategoryError(null);
+        }}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Add Expense Category</DialogTitle>
+        <DialogContent sx={{ pt: 2 }}>
+          {categoryError && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {categoryError}
+            </Alert>
+          )}
+          <TextField
+            fullWidth
+            label="Category Name"
+            value={newCategoryName}
+            onChange={(e) => setNewCategoryName(e.target.value)}
+            disabled={categoryCreating}
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            fullWidth
+            label="Description (Optional)"
+            value={newCategoryDesc}
+            onChange={(e) => setNewCategoryDesc(e.target.value)}
+            disabled={categoryCreating}
+            multiline
+            rows={2}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setShowCategoryDialog(false);
+              setNewCategoryName('');
+              setNewCategoryDesc('');
+              setCategoryError(null);
+            }}
+            disabled={categoryCreating}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleCreateCategory}
+            variant="contained"
+            color="primary"
+            disabled={categoryCreating || !newCategoryName.trim()}
+          >
+            {categoryCreating ? <CircularProgress size={20} sx={{ mr: 1 }} /> : null}
+            Create
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Dialog>
   );
 };

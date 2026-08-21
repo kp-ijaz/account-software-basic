@@ -10,12 +10,16 @@ import {
   CircularProgress,
   Alert,
   Grid,
+  Box,
+  IconButton,
 } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Income, IncomeCategory, CreateIncomeInput } from '../../types/income';
 import incomeService from '../../services/incomeService';
+import categoryService from '../../services/categoryService';
 
 // Form validation schema
 const incomeSchema = z.object({
@@ -44,10 +48,15 @@ export default function IncomeForm({
   categories,
   onClose,
   onSuccess,
-  loading = false,
 }: IncomeFormProps) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showCategoryDialog, setShowCategoryDialog] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [newCategoryDesc, setNewCategoryDesc] = useState('');
+  const [categoryCreating, setCategoryCreating] = useState(false);
+  const [categoryError, setCategoryError] = useState<string | null>(null);
+  const [localCategories, setLocalCategories] = useState<IncomeCategory[]>(categories);
 
   const {
     control,
@@ -86,7 +95,45 @@ export default function IncomeForm({
         reference: income.reference,
       });
     }
-  }, [open, income, reset]);
+    setLocalCategories(categories);
+  }, [open, income, reset, categories]);
+
+  const handleCreateCategory = async () => {
+    try {
+      if (!newCategoryName.trim()) {
+        setCategoryError('Category name is required');
+        return;
+      }
+
+      setCategoryCreating(true);
+      setCategoryError(null);
+
+      const response = await categoryService.createIncomeCategory(
+        newCategoryName.trim(),
+        newCategoryDesc.trim()
+      );
+
+      // Add new category to local list
+      setLocalCategories([...localCategories, response.data]);
+
+      // Update form category selection to the new category
+      reset(undefined, { keepValues: true });
+      const form = document.querySelector('input[name="categoryId"]') as HTMLInputElement;
+      if (form) {
+        form.value = response.data.id;
+      }
+
+      // Reset dialog
+      setNewCategoryName('');
+      setNewCategoryDesc('');
+      setShowCategoryDialog(false);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to create category';
+      setCategoryError(message);
+    } finally {
+      setCategoryCreating(false);
+    }
+  };
 
   const onSubmit = async (data: IncomeFormData) => {
     try {
@@ -152,27 +199,40 @@ export default function IncomeForm({
 
           {/* Category */}
           <Grid item xs={12}>
-            <Controller
-              name="categoryId"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  label="Category"
-                  select
-                  error={!!errors.categoryId}
-                  helperText={errors.categoryId?.message}
-                  disabled={submitting}
-                >
-                  {categories.map((cat) => (
-                    <MenuItem key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              )}
-            />
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+              <Box sx={{ flex: 1 }}>
+                <Controller
+                  name="categoryId"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      label="Category"
+                      select
+                      error={!!errors.categoryId}
+                      helperText={errors.categoryId?.message}
+                      disabled={submitting}
+                    >
+                      {localCategories.map((cat) => (
+                        <MenuItem key={cat.id} value={cat.id}>
+                          {cat.name}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  )}
+                />
+              </Box>
+              <IconButton
+                size="small"
+                onClick={() => setShowCategoryDialog(true)}
+                disabled={submitting}
+                sx={{ mt: 1 }}
+                title="Add new category"
+              >
+                <AddIcon />
+              </IconButton>
+            </Box>
           </Grid>
 
           {/* Description */}
@@ -272,6 +332,67 @@ export default function IncomeForm({
           {income ? 'Update' : 'Create'}
         </Button>
       </DialogActions>
+
+      {/* Add Category Dialog */}
+      <Dialog
+        open={showCategoryDialog}
+        onClose={() => {
+          setShowCategoryDialog(false);
+          setNewCategoryName('');
+          setNewCategoryDesc('');
+          setCategoryError(null);
+        }}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Add Income Category</DialogTitle>
+        <DialogContent sx={{ pt: 2 }}>
+          {categoryError && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {categoryError}
+            </Alert>
+          )}
+          <TextField
+            fullWidth
+            label="Category Name"
+            value={newCategoryName}
+            onChange={(e) => setNewCategoryName(e.target.value)}
+            disabled={categoryCreating}
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            fullWidth
+            label="Description (Optional)"
+            value={newCategoryDesc}
+            onChange={(e) => setNewCategoryDesc(e.target.value)}
+            disabled={categoryCreating}
+            multiline
+            rows={2}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setShowCategoryDialog(false);
+              setNewCategoryName('');
+              setNewCategoryDesc('');
+              setCategoryError(null);
+            }}
+            disabled={categoryCreating}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleCreateCategory}
+            variant="contained"
+            color="primary"
+            disabled={categoryCreating || !newCategoryName.trim()}
+          >
+            {categoryCreating ? <CircularProgress size={20} sx={{ mr: 1 }} /> : null}
+            Create
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Dialog>
   );
 }

@@ -17,6 +17,7 @@ import dashboardRoutes from './routes/dashboard';
 import reportRoutes from './routes/reports';
 import auditRoutes from './routes/audit';
 import settingsRoutes from './routes/settings';
+import categoryRoutes from './routes/categories';
 
 const app = express();
 
@@ -102,6 +103,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/audit', auditRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/categories', categoryRoutes);
 
 // ===== 404 Handler =====
 app.use(notFoundMiddleware);
