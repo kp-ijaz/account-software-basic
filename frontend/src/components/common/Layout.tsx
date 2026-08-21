@@ -18,8 +18,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           flex: 1,
           display: 'flex',
           flexDirection: 'column',
-          marginLeft: { xs: 0, md: `${DRAWER_WIDTH}px` },
-          width: { xs: '100%', md: `calc(100% - ${DRAWER_WIDTH}px)` },
           overflow: 'hidden'
         }}
       >
