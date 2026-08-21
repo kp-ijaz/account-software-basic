@@ -16,6 +16,8 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import PrintIcon from '@mui/icons-material/Print';
@@ -62,6 +64,8 @@ const ReportsPage: React.FC = () => {
 
   const [tabValue, setTabValue] = useState(0);
   const currentYear = new Date().getFullYear();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   useEffect(() => {
     // Load monthly report on component mount
@@ -144,17 +148,20 @@ const ReportsPage: React.FC = () => {
         </Alert>
       )}
 
-      {/* Tab Navigation */}
-      <Paper sx={{ mb: 3 }}>
-        <Tabs value={tabValue} onChange={(_, value) => setTabValue(value)}>
-          <Tab label="Monthly Report" />
-          <Tab label="Yearly Report" />
-          <Tab label="Balance Sheet" />
-        </Tabs>
-      </Paper>
+      {/* Tab Navigation - Mobile Only */}
+      {isMobile && (
+        <Paper sx={{ mb: 3 }}>
+          <Tabs value={tabValue} onChange={(_, value) => setTabValue(value)}>
+            <Tab label="Monthly Report" />
+            <Tab label="Yearly Report" />
+            <Tab label="Balance Sheet" />
+          </Tabs>
+        </Paper>
+      )}
 
-      {/* Monthly Report Tab */}
-      <TabPanel value={tabValue} index={0}>
+      {/* Monthly Report Tab - Show on mobile with tab or on desktop always */}
+      {(isMobile && tabValue === 0) || !isMobile ? (
+      <Box>
         {/* Month/Year Selection */}
         <Grid container spacing={2} sx={{ mb: 3 }}>
           <Grid item xs={12} sm={6} md={3}>
@@ -223,10 +230,12 @@ const ReportsPage: React.FC = () => {
         ) : monthlyReport ? (
           <MonthlyReportView report={monthlyReport} />
         ) : null}
-      </TabPanel>
+      </Box>
+      ) : null}
 
-      {/* Yearly Report Tab */}
-      <TabPanel value={tabValue} index={1}>
+      {/* Yearly Report Tab - Show on mobile with tab */}
+      {isMobile && tabValue === 1 ? (
+      <Box>
         {/* Year Selection */}
         <Grid container spacing={2} sx={{ mb: 3 }}>
           <Grid item xs={12} sm={6} md={3}>
@@ -276,10 +285,12 @@ const ReportsPage: React.FC = () => {
         ) : yearlyReport ? (
           <YearlyReportView report={yearlyReport} />
         ) : null}
-      </TabPanel>
+      </Box>
+      ) : null}
 
-      {/* Balance Sheet Tab */}
-      <TabPanel value={tabValue} index={2}>
+      {/* Balance Sheet Tab - Show on mobile with tab */}
+      {isMobile && tabValue === 2 ? (
+      <Box>
         {/* Actions */}
         <Grid container spacing={2} sx={{ mb: 3 }}>
           <Grid item xs={12} sm={6} md={3}>
@@ -312,7 +323,8 @@ const ReportsPage: React.FC = () => {
         ) : balanceSheet ? (
           <BalanceSheetView balanceSheet={balanceSheet} />
         ) : null}
-      </TabPanel>
+      </Box>
+      ) : null}
     </Container>
   );
 };
