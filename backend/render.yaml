@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: account-software-basic-backend
+    env: node
+    buildCommand: npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: DATABASE_URL
+        value: postgresql://postgres:Koofiya%402026@db.kukddbnqkmnkoynnfcqv.supabase.co:6543/postgres
+      - key: JWT_SECRET
+        value: 20ec0671451d4b11dff28551f5947413350bf182eb1c0179f75c247c3be0ece5
+      - key: CORS_ORIGIN
+        value: https://account-software-basic.onrender.com
+      - key: JWT_EXPIRE
+        value: 24h
+      - key: BCRYPT_ROUNDS
+        value: 12
+      - key: LOG_LEVEL
+        value: info
