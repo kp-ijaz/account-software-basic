@@ -51,6 +51,11 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Skip non-HTTP(S) schemes (chrome-extension, etc)
+  if (!url.protocol.startsWith('http')) {
+    return;
+  }
+
   // Handle API requests separately
   if (url.pathname.startsWith('/api/')) {
     return event.respondWith(
