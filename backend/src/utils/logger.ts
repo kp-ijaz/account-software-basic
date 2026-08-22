@@ -38,10 +38,18 @@ class Logger {
   }
 
   private logToFile(message: string) {
-    this.ensureLogsDir();
-    const date = new Date().toISOString().split('T')[0];
-    const logFile = path.join(logsDir, `${date}.log`);
-    fs.appendFileSync(logFile, message + '\n');
+    // Skip file logging on Vercel (read-only filesystem)
+    if (process.env.NODE_ENV === 'production') {
+      return;
+    }
+    try {
+      this.ensureLogsDir();
+      const date = new Date().toISOString().split('T')[0];
+      const logFile = path.join(logsDir, `${date}.log`);
+      fs.appendFileSync(logFile, message + '\n');
+    } catch (err) {
+      // Silently fail if filesystem is not writable
+    }
   }
 }
 

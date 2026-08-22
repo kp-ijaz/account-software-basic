@@ -21,6 +21,9 @@ import categoryRoutes from './routes/categories';
 
 const app = express();
 
+// ===== Trust Proxy (required for Vercel and rate limiting) =====
+app.set('trust proxy', 1);
+
 // ===== Security Headers Middleware =====
 app.use(helmet({
   contentSecurityPolicy: {
