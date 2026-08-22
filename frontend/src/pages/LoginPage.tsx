@@ -75,7 +75,9 @@ export default function LoginPage() {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Login failed';
       console.error('❌ Login error:', err);
+      console.log('Setting error state to:', message);
       setError(message);
+      console.log('Error state set! Should display now.');
       dispatch(setAuthError(message));
     } finally {
       setLoading(false);

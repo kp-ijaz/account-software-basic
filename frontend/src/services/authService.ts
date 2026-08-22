@@ -22,8 +22,9 @@ class AuthService {
       return response.data;
     } catch (error: any) {
       console.error('🚨 AuthService.login error:', error);
-      const message = error.response?.data?.message || 'Login failed';
+      const message = error.response?.data?.message || error.message || 'Login failed';
       console.error('Error message:', message);
+      console.error('Full error response:', error.response?.data);
       throw new Error(message);
     }
   }
