@@ -35,7 +35,7 @@ const startServer = async () => {
 
     // Start server
     const server = app.listen(env.PORT, () => {
-      logger.info(`✅ Server running on port ${env.PORT} [v2.0]`);
+      logger.info(`✅ Server running on port ${env.PORT} [v2.1 - pooling]`);
       logger.info(`📡 API: http://localhost:${env.PORT}/api`);
       logger.info(`🏥 Health: http://localhost:${env.PORT}/api/health`);
       logger.info(`🔧 Environment: ${env.NODE_ENV}`);
