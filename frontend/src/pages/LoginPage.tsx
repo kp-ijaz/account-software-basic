@@ -45,18 +45,13 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      console.log('🔐 Login attempt with:', data);
       setLoading(true);
       setError(null);
 
       // Call login service
-      console.log('📞 Calling authService.login...');
       const response = await authService.login(data);
 
-      console.log('✅ Login response:', response);
-
       if (response.success && response.data) {
-        console.log('🎉 Login successful! Dispatching auth...');
         // Dispatch to Redux store
         dispatch(
           setAuthenticated({
@@ -65,19 +60,14 @@ export default function LoginPage() {
           })
         );
 
-        console.log('🚀 Navigating to dashboard...');
         // Navigate to dashboard
         navigate('/');
       } else {
-        console.log('❌ Login failed:', response.message);
         setError(response.message || 'Login failed');
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Login failed';
-      console.error('❌ Login error:', err);
-      console.log('Setting error state to:', message);
       setError(message);
-      console.log('Error state set! Should display now.');
       dispatch(setAuthError(message));
     } finally {
       setLoading(false);
