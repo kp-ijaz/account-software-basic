@@ -5,9 +5,14 @@ import prisma from './config/database';
 
 const startServer = async () => {
   try {
-    // Test database connection
-    await prisma.$queryRaw`SELECT 1`;
-    logger.info('✅ Database connected successfully');
+    // Test database connection (optional - don't crash if it fails)
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+      logger.info('✅ Database connected successfully');
+    } catch (dbError) {
+      logger.warn('⚠️ Database connection failed, starting anyway');
+      logger.warn(dbError);
+    }
 
     // Start server
     const server = app.listen(env.PORT, () => {
