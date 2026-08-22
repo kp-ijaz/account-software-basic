@@ -96,6 +96,9 @@ self.addEventListener('fetch', (event) => {
 
       return fetch(request)
         .then((response) => {
+          // Clone response before using it
+          const responseToCache = response.clone();
+
           // Cache successful responses
           if (response.ok && (
             request.destination === 'script' ||
@@ -103,8 +106,9 @@ self.addEventListener('fetch', (event) => {
             request.destination === 'image' ||
             request.destination === 'document'
           )) {
-            const cache = caches.open(CACHE_NAME);
-            cache.then((c) => c.put(request, response.clone()));
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(request, responseToCache);
+            });
           }
           return response;
         })
