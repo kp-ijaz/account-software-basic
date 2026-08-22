@@ -10,10 +10,10 @@ export const apiLimiter = rateLimit({
   skip: (req) => process.env.NODE_ENV === 'development',
 });
 
-// Login rate limiter: 5 attempts per 15 minutes per IP
+// Login rate limiter: 50 attempts per 15 minutes per IP (increased for testing)
 export const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 5,
+  max: 50,
   message: 'Too many login attempts, please try again after 15 minutes',
   standardHeaders: true,
   legacyHeaders: false,
