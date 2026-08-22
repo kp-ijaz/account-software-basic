@@ -3,24 +3,25 @@
   "buildCommand": "npm run build",
   "builds": [
     {
-      "src": "dist/index.js",
+      "src": "api/index.ts",
       "use": "@vercel/node",
       "config": {
-        "maxLambdaSize": "50mb"
+        "maxLambdaSize": "50mb",
+        "includeFiles": "dist/**"
       }
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "dist/index.js"
+      "dest": "api/index.ts"
     }
   ],
   "env": {
     "NODE_ENV": "production"
   },
   "functions": {
-    "dist/index.js": {
+    "api/index.ts": {
       "memory": 1024,
       "maxDuration": 30
     }
