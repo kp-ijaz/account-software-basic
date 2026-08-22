@@ -2,6 +2,7 @@ import app from './app';
 import env from './config/env';
 import logger from './utils/logger';
 import prisma from './config/database';
+import bcryptjs from 'bcryptjs';
 
 const startServer = async () => {
   try {
@@ -9,6 +10,24 @@ const startServer = async () => {
     try {
       await prisma.$queryRaw`SELECT 1`;
       logger.info('✅ Database connected successfully');
+
+      // Auto-seed admin user if doesn't exist
+      const adminExists = await prisma.user.findUnique({
+        where: { email: 'koofiya@admin.com' }
+      });
+
+      if (!adminExists) {
+        logger.info('Creating default admin user...');
+        const passwordHash = await bcryptjs.hash('Koofiya1234', 12);
+        await prisma.user.create({
+          data: {
+            email: 'koofiya@admin.com',
+            username: 'koofiya',
+            passwordHash
+          }
+        });
+        logger.info('✅ Admin user created: koofiya@admin.com');
+      }
     } catch (dbError) {
       logger.warn('⚠️ Database connection failed, starting anyway');
       logger.warn(dbError);
