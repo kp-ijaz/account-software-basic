@@ -13,6 +13,7 @@
     "seed": "ts-node src/seed.ts",
     "studio": "npx prisma studio",
     "prisma:generate": "npx prisma generate",
+    "postinstall": "npx prisma generate",
     "test:data": "ts-node src/scripts/generateTestData.ts",
     "test:performance": "ts-node src/scripts/performanceTest.ts"
   },
