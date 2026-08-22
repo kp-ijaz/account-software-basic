@@ -10,8 +10,15 @@ export const apiLimiter = rateLimit({
   skip: (req) => process.env.NODE_ENV === 'development',
 });
 
-// Login rate limiter: DISABLED for testing (will re-enable in production)
-export const loginLimiter = (req: any, res: any, next: any) => next();
+// Login rate limiter: 20 attempts per 15 minutes per IP (production-safe)
+export const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: 'Too many login attempts, please try again after 15 minutes',
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => req.ip || 'unknown',
+});
 
 // Password change rate limiter: 3 attempts per hour
 export const passwordChangeLimiter = rateLimit({
