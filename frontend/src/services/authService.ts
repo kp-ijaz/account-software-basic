@@ -7,16 +7,23 @@ class AuthService {
    */
   async login(data: LoginRequest): Promise<LoginResponse> {
     try {
+      console.log('🔑 AuthService.login called with:', data);
       const response = await api.post<LoginResponse>('/auth/login', data);
+
+      console.log('✨ AuthService received response:', response.data);
 
       if (response.data.success && response.data.data?.token) {
         // Store token in localStorage
+        console.log('💾 Storing token in localStorage');
         localStorage.setItem('auth_token', response.data.data.token);
+        console.log('✅ Token stored');
       }
 
       return response.data;
     } catch (error: any) {
+      console.error('🚨 AuthService.login error:', error);
       const message = error.response?.data?.message || 'Login failed';
+      console.error('Error message:', message);
       throw new Error(message);
     }
   }
