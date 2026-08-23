@@ -126,6 +126,75 @@ class AuthService {
       return false;
     }
   }
+
+  /**
+   * Check database connection
+   */
+  async checkDatabaseConnection(): Promise<{
+    connected: boolean;
+    timestamp: string;
+    userCount?: number;
+  }> {
+    try {
+      // Try to count users to verify connection
+      const userCount = await prisma.user.count();
+
+      return {
+        connected: true,
+        timestamp: new Date().toISOString(),
+        userCount,
+      };
+    } catch (error) {
+      logger.error('Database connection check failed', error as Error);
+      throw new ApiError(503, 'Database connection failed');
+    }
+  }
+
+  /**
+   * Create admin user (only allowed if no users exist yet)
+   */
+  async createAdminUser(input: {
+    email: string;
+    username: string;
+    password: string;
+  }): Promise<{
+    id: string;
+    email: string;
+    username: string;
+  }> {
+    try {
+      // Check if any users already exist
+      const existingUserCount = await prisma.user.count();
+      if (existingUserCount > 0) {
+        throw new ApiError(
+          403,
+          'Admin user already exists. Only one admin account is allowed.'
+        );
+      }
+
+      // Create user via userService
+      const user = await userService.createUser(input);
+
+      // Log audit event
+      await prisma.auditLog.create({
+        data: {
+          action: 'ADMIN_USER_CREATED',
+          description: `Admin user created: ${input.email}`,
+          userId: user.id,
+        },
+      });
+
+      logger.info(`Admin user created: ${input.email}`);
+
+      return user;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      logger.error('Error creating admin user', error as Error);
+      throw new ApiError(500, 'Failed to create admin user');
+    }
+  }
 }
 
 export default new AuthService();

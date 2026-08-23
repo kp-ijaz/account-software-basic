@@ -6,6 +6,8 @@ import {
   getCurrentUser,
   checkEmail,
   checkUsername,
+  checkDatabaseConnection,
+  createAdminUser,
 } from '../controllers/authController';
 import { authMiddleware } from '../middleware/auth';
 import { loginLimiter, passwordChangeLimiter } from '../middleware/rateLimiter';
@@ -24,6 +26,12 @@ router.post('/check-email', checkEmail);
 
 // Check username availability
 router.post('/check-username', checkUsername);
+
+// Check database connection (health check)
+router.get('/check-db', checkDatabaseConnection);
+
+// Create admin user (only if no users exist yet)
+router.post('/register', loginLimiter, createAdminUser);
 
 /**
  * Protected routes (authentication required)

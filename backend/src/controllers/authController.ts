@@ -4,6 +4,7 @@ import userService from '../services/userService';
 import { ApiError } from '../utils/errorHandler';
 import { AuthRequest } from '../middleware/auth';
 import logger from '../utils/logger';
+import { validateEmail, validatePassword, validateStringLength } from '../middleware/validation';
 
 /**
  * Login controller
@@ -195,6 +196,97 @@ export const checkUsername = async (
     res.status(200).json({
       success: true,
       data: { available },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Check database connection
+ * GET /api/auth/check-db
+ */
+export const checkDatabaseConnection = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const dbStatus = await authService.checkDatabaseConnection();
+
+    res.status(200).json({
+      success: true,
+      data: dbStatus,
+    });
+  } catch (error) {
+    logger.error('Database connection check failed', error as Error);
+    res.status(503).json({
+      success: false,
+      message: 'Database connection failed',
+      data: {
+        connected: false,
+        timestamp: new Date().toISOString(),
+      },
+    });
+  }
+};
+
+/**
+ * Create admin user (only allowed if no users exist)
+ * POST /api/auth/register
+ */
+export const createAdminUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { email, username, password } = req.body;
+
+    // Validate email
+    if (!email || !validateEmail(email)) {
+      throw new ApiError(400, 'Valid email is required');
+    }
+
+    // Validate username
+    if (!username) {
+      throw new ApiError(400, 'Username is required');
+    }
+
+    if (!validateStringLength(username, 3, 50)) {
+      throw new ApiError(400, 'Username must be between 3 and 50 characters');
+    }
+
+    // Check if username contains only valid characters
+    if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
+      throw new ApiError(
+        400,
+        'Username can only contain letters, numbers, underscores, and hyphens'
+      );
+    }
+
+    // Validate password
+    if (!password) {
+      throw new ApiError(400, 'Password is required');
+    }
+
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.valid) {
+      throw new ApiError(400, passwordValidation.errors.join('; '));
+    }
+
+    // Create user via service
+    const user = await authService.createAdminUser({
+      email: email.toLowerCase().trim(),
+      username: username.trim(),
+      password,
+    });
+
+    // Return created user
+    res.status(201).json({
+      success: true,
+      message: 'Admin user created successfully',
+      data: user,
     });
   } catch (error) {
     next(error);
