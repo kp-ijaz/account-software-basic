@@ -13,7 +13,6 @@ import {
 } from 'recharts';
 import { Paper, Box, Typography } from '@mui/material';
 import { DashboardChartData } from '../../types/dashboard';
-import { formatINRNumber } from '../../utils/currency';
 
 interface IncomeExpenseChartProps {
   data: DashboardChartData[];
@@ -45,12 +44,12 @@ const IncomeExpenseChart: React.FC<IncomeExpenseChartProps> = ({
       <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
         {title}
       </Typography>
-      <Box sx={{ width: '100%', height: 400 }}>
+      <Box sx={{ width: '100%', height: 450 }}>
         <ResponsiveContainer width="100%" height="100%">
           {chartType === 'bar' ? (
-            <BarChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+            <BarChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 80 }}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
+              <XAxis dataKey="month" angle={-45} textAnchor="end" height={100} />
               <YAxis tickFormatter={formatCurrency} />
               <Tooltip
                 formatter={(value: any) => formatCurrency(value)}
@@ -61,9 +60,9 @@ const IncomeExpenseChart: React.FC<IncomeExpenseChartProps> = ({
               <Bar dataKey="expense" fill="#f44336" name="Expense" />
             </BarChart>
           ) : (
-            <LineChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+            <LineChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 80 }}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
+              <XAxis dataKey="month" angle={-45} textAnchor="end" height={100} />
               <YAxis tickFormatter={formatCurrency} />
               <Tooltip
                 formatter={(value: any) => formatCurrency(value)}
