@@ -38,10 +38,6 @@ model Settings {
   currency           String    @default("INR")
   currencySymbol     String    @default("₹")
   financialYearStart Int       @default(1)
-  financialYearEnd   Int       @default(12)
-  website            String?
-  taxId              String?
-  registrationNumber String?
   openingBalance     Decimal   @db.Decimal(15, 2) @default(0)
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt

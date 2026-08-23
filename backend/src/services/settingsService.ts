@@ -9,6 +9,25 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
 
 const MAX_LOGO_BYTES = 2 * 1024 * 1024;
 
+const SETTINGS_SELECT = {
+  id: true,
+  madrasaName: true,
+  logo: true,
+  address: true,
+  phone: true,
+  email: true,
+  currency: true,
+  currencySymbol: true,
+  financialYearStart: true,
+  openingBalance: true,
+  createdAt: true,
+  updatedAt: true,
+} as const;
+
+function yearEndFromStart(startMonth: number): number {
+  return startMonth === 1 ? 12 : startMonth - 1;
+}
+
 class SettingsService {
   async getSettings(): Promise<MadrasaSettings> {
     try {
@@ -29,13 +48,6 @@ class SettingsService {
         throw new ApiError(400, 'Financial year start month must be between 1 and 12');
       }
 
-      if (
-        data.financialYearEnd !== undefined &&
-        (data.financialYearEnd < 1 || data.financialYearEnd > 12)
-      ) {
-        throw new ApiError(400, 'Financial year end month must be between 1 and 12');
-      }
-
       if (data.phone && data.phone.replace(/\D/g, '').length < 8) {
         throw new ApiError(400, 'Please enter a valid phone number');
       }
@@ -47,44 +59,23 @@ class SettingsService {
       const existing = await this.getOrCreateSettings();
       const currency = data.currency || existing.currency || 'INR';
 
-      const coreData = {
-        ...(data.madrasaName !== undefined && { madrasaName: data.madrasaName.trim() }),
-        ...(data.address !== undefined && { address: data.address }),
-        ...(data.phone !== undefined && { phone: data.phone }),
-        ...(data.email !== undefined && { email: data.email }),
-        ...(data.currency !== undefined && {
-          currency,
-          currencySymbol: CURRENCY_SYMBOLS[currency] || existing.currencySymbol,
-        }),
-        ...(data.financialYearStart !== undefined && {
-          financialYearStart: data.financialYearStart,
-        }),
-      };
-
-      const extraData = {
-        ...(data.financialYearEnd !== undefined && {
-          financialYearEnd: data.financialYearEnd,
-        }),
-        ...(data.website !== undefined && { website: data.website || null }),
-        ...(data.taxId !== undefined && { taxId: data.taxId || null }),
-        ...(data.registrationNumber !== undefined && {
-          registrationNumber: data.registrationNumber || null,
-        }),
-      };
-
-      let settings;
-      try {
-        settings = await db.settings.update({
-          where: { id: existing.id },
-          data: { ...coreData, ...extraData },
-        });
-      } catch (updateError) {
-        logger.warn(`Saving extended settings fields failed, saving core fields only: ${updateError}`);
-        settings = await db.settings.update({
-          where: { id: existing.id },
-          data: coreData,
-        });
-      }
+      const settings = await db.settings.update({
+        where: { id: existing.id },
+        data: {
+          ...(data.madrasaName !== undefined && { madrasaName: data.madrasaName.trim() }),
+          ...(data.address !== undefined && { address: data.address }),
+          ...(data.phone !== undefined && { phone: data.phone }),
+          ...(data.email !== undefined && { email: data.email }),
+          ...(data.currency !== undefined && {
+            currency,
+            currencySymbol: CURRENCY_SYMBOLS[currency] || existing.currencySymbol,
+          }),
+          ...(data.financialYearStart !== undefined && {
+            financialYearStart: data.financialYearStart,
+          }),
+        },
+        select: SETTINGS_SELECT,
+      });
 
       logger.info('Settings updated successfully');
       return this.formatSettings(settings);
@@ -102,6 +93,7 @@ class SettingsService {
       const settings = await db.settings.update({
         where: { id: existing.id },
         data: { logo: logoDataUrl },
+        select: SETTINGS_SELECT,
       });
 
       logger.info('Logo updated successfully');
@@ -135,7 +127,9 @@ class SettingsService {
   }
 
   private async getOrCreateSettings() {
-    let settings = await db.settings.findFirst();
+    let settings = await db.settings.findFirst({
+      select: SETTINGS_SELECT,
+    });
 
     if (!settings) {
       settings = await db.settings.create({
@@ -148,13 +142,26 @@ class SettingsService {
           currencySymbol: '₹',
           financialYearStart: 1,
         },
+        select: SETTINGS_SELECT,
       });
     }
 
     return settings;
   }
 
-  private formatSettings(settings: any): MadrasaSettings {
+  private formatSettings(settings: {
+    id: string;
+    madrasaName: string;
+    logo: string | null;
+    address: string | null;
+    phone: string | null;
+    email: string | null;
+    currency: string;
+    currencySymbol: string;
+    financialYearStart: number;
+    createdAt: Date;
+    updatedAt: Date;
+  }): MadrasaSettings {
     return {
       id: settings.id,
       madrasaName: settings.madrasaName,
@@ -165,10 +172,10 @@ class SettingsService {
       currency: settings.currency,
       currencySymbol: settings.currencySymbol || '₹',
       financialYearStart: settings.financialYearStart,
-      financialYearEnd: settings.financialYearEnd || 12,
-      website: settings.website || '',
-      taxId: settings.taxId || '',
-      registrationNumber: settings.registrationNumber || '',
+      financialYearEnd: yearEndFromStart(settings.financialYearStart),
+      website: '',
+      taxId: '',
+      registrationNumber: '',
       createdAt: settings.createdAt.toISOString(),
       updatedAt: settings.updatedAt.toISOString(),
     };
