@@ -41,12 +41,7 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !isAuthEndpoint && !isHandlingUnauthorized) {
       isHandlingUnauthorized = true;
       store.dispatch(logout());
-
-      if (window.location.pathname !== '/login') {
-        window.location.href = '/login';
-      } else {
-        isHandlingUnauthorized = false;
-      }
+      isHandlingUnauthorized = false;
     }
 
     return Promise.reject(error);

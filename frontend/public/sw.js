@@ -1,37 +1,26 @@
-const CACHE_NAME = 'madrasa-accounting-v1';
-const OFFLINE_CACHE = 'madrasa-offline-v1';
+const CACHE_NAME = 'madrasa-accounting-v2';
 const API_CACHE = 'madrasa-api-v1';
 
-// Files to cache on install
 const STATIC_ASSETS = [
-  '/',
   '/index.html',
   '/manifest.json',
 ];
 
-// Install event - cache static assets
 self.addEventListener('install', (event) => {
-  console.log('🔧 Service Worker installing...');
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('✅ Caching static assets');
-      return cache.addAll(STATIC_ASSETS).catch(err => {
-        console.log('Note: Some assets could not be cached during install', err);
-      });
+      return cache.addAll(STATIC_ASSETS).catch(() => undefined);
     })
   );
   self.skipWaiting();
 });
 
-// Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-  console.log('🚀 Service Worker activating...');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME && cacheName !== API_CACHE) {
-            console.log('🧹 Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
@@ -41,41 +30,33 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch event - implement caching strategy
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip non-GET requests
   if (request.method !== 'GET') {
     return;
   }
 
-  // Skip non-HTTP(S) schemes (chrome-extension, etc)
   if (!url.protocol.startsWith('http')) {
     return;
   }
 
-  // Handle API requests separately
   if (url.pathname.startsWith('/api/')) {
-    return event.respondWith(
+    event.respondWith(
       fetch(request)
         .then((response) => {
-          // Cache successful API responses
           if (response.ok) {
-            const cache = caches.open(API_CACHE);
-            cache.then((c) => c.put(request, response.clone()));
+            caches.open(API_CACHE).then((cache) => cache.put(request, response.clone()));
           }
           return response;
         })
         .catch(() => {
-          // Return cached API response on error
           return caches.match(request).then((cached) => {
             if (cached) {
-              console.log('📦 Serving API response from cache:', url.pathname);
               return cached;
             }
-            // Return offline response
+
             return new Response(
               JSON.stringify({
                 success: false,
@@ -90,44 +71,53 @@ self.addEventListener('fetch', (event) => {
           });
         })
     );
+    return;
   }
 
-  // Handle static assets with cache-first strategy
+  // Always fetch fresh HTML for page navigations (fixes stale dashboard refresh at "/")
+  if (request.mode === 'navigate' || request.destination === 'document') {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response.ok) {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put('/index.html', responseToCache);
+            });
+          }
+          return response;
+        })
+        .catch(() => caches.match('/index.html'))
+    );
+    return;
+  }
+
+  // Cache-first for static assets (JS, CSS, images)
   event.respondWith(
     caches.match(request).then((cached) => {
       if (cached) {
         return cached;
       }
 
-      return fetch(request)
-        .then((response) => {
-          // Clone response before using it
-          const responseToCache = response.clone();
-
-          // Cache successful responses
-          if (response.ok && (
-            request.destination === 'script' ||
+      return fetch(request).then((response) => {
+        if (
+          response.ok &&
+          (request.destination === 'script' ||
             request.destination === 'style' ||
             request.destination === 'image' ||
-            request.destination === 'document'
-          )) {
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(request, responseToCache);
-            });
-          }
-          return response;
-        })
-        .catch(() => {
-          // Return cached version or offline page
-          return caches.match(request).then((cachedResponse) => {
-            return cachedResponse || caches.match('/index.html');
+            request.destination === 'font')
+        ) {
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(request, responseToCache);
           });
-        });
+        }
+        return response;
+      });
     })
   );
 });
 
-// Handle messages from clients
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
@@ -140,20 +130,12 @@ self.addEventListener('message', (event) => {
   }
 });
 
-// Periodic background sync for offline data sync
 self.addEventListener('sync', (event) => {
   if (event.tag === 'sync-data') {
     event.waitUntil(
-      // Attempt to sync pending transactions
       fetch('/api/sync', { method: 'POST' })
-        .then((response) => {
-          console.log('✅ Offline data synced');
-          return response;
-        })
-        .catch(() => {
-          console.log('⏳ Sync scheduled for later');
-          // Will retry automatically
-        })
+        .then((response) => response)
+        .catch(() => undefined)
     );
   }
 });

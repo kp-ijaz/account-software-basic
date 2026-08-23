@@ -5,6 +5,7 @@ import { PersistGate } from 'redux-persist/integration/react';
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import { store, persistor } from './store';
+import { initializeAuthFromStorage } from './utils/authInit';
 import App from './App.tsx';
 import './styles/global.css';
 
@@ -17,7 +18,11 @@ const PersistLoading = () => (
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <Provider store={store}>
-      <PersistGate loading={<PersistLoading />} persistor={persistor}>
+      <PersistGate
+        loading={<PersistLoading />}
+        persistor={persistor}
+        onBeforeLift={initializeAuthFromStorage}
+      >
         <App />
       </PersistGate>
     </Provider>
