@@ -42,16 +42,7 @@ export interface SettingsState {
 }
 
 export const SUPPORTED_CURRENCIES = [
-  { code: 'USD', symbol: '$', name: 'US Dollar' },
-  { code: 'EUR', symbol: '€', name: 'Euro' },
-  { code: 'GBP', symbol: '£', name: 'British Pound' },
-  { code: 'AED', symbol: 'د.إ', name: 'United Arab Emirates Dirham' },
-  { code: 'SAR', symbol: '﷼', name: 'Saudi Riyal' },
-  { code: 'KWD', symbol: 'د.ك', name: 'Kuwaiti Dinar' },
-  { code: 'QAR', symbol: 'ر.ق', name: 'Qatari Riyal' },
-  { code: 'PKR', symbol: '₨', name: 'Pakistani Rupee' },
   { code: 'INR', symbol: '₹', name: 'Indian Rupee' },
-  { code: 'BDT', symbol: '৳', name: 'Bangladeshi Taka' },
 ] as const;
 
 export const MONTHS = [

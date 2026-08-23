@@ -19,7 +19,7 @@ const BalanceSheetView: React.FC<BalanceSheetViewProps> = ({ balanceSheet }) => 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'INR',
       minimumFractionDigits: 2,
     }).format(amount);
   };

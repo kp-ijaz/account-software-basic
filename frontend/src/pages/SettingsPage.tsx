@@ -35,7 +35,7 @@ const SettingsPage: React.FC = () => {
     address: '',
     phone: '',
     email: '',
-    currency: 'USD',
+    currency: 'INR',
     financialYearStart: 1,
     financialYearEnd: 12,
     website: '',

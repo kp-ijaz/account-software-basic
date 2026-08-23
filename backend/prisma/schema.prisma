@@ -35,8 +35,8 @@ model Settings {
   address           String?
   phone             String?
   email             String?
-  currency          String    @default("USD")
-  currencySymbol    String    @default("$")
+  currency          String    @default("INR")
+  currencySymbol    String    @default("₹")
   financialYearStart Int      @default(1)  // 1-12 (month)
   openingBalance    Decimal   @db.Decimal(15, 2) @default(0)
 

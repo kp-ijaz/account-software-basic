@@ -15,7 +15,7 @@ const SummaryCard: React.FC<SummaryCardProps> = ({ title, amount, type, icon }) 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'INR',
       minimumFractionDigits: 2,
     }).format(value);
   };

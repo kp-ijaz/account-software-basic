@@ -16,7 +16,7 @@ class SettingsService {
             address: '',
             phone: '',
             email: '',
-            currency: 'USD',
+            currency: 'INR',
             financialYearStart: 1,
           },
         });
@@ -58,7 +58,7 @@ class SettingsService {
             address: data.address || '',
             phone: data.phone || '',
             email: data.email || '',
-            currency: data.currency || 'USD',
+            currency: data.currency || 'INR',
             financialYearStart: data.financialYearStart || 1,
           },
         });
@@ -96,7 +96,7 @@ class SettingsService {
             address: '',
             phone: '',
             email: '',
-            currency: 'USD',
+            currency: 'INR',
             financialYearStart: 1,
             logo: logoPath,
           },

@@ -99,8 +99,8 @@ async function seed() {
       await prisma.settings.create({
         data: {
           madrasaName: 'Madrasa',
-          currency: 'USD',
-          currencySymbol: '$',
+          currency: 'INR',
+          currencySymbol: '₹',
           financialYearStart: 1,
           openingBalance: 0,
         },
