@@ -20,6 +20,35 @@ interface IncomeExpenseChartProps {
   chartType?: 'bar' | 'line';
 }
 
+// Custom curved tick component for labels
+const CurvedTick = (props: any) => {
+  const { x, y, payload } = props;
+  const radius = 80;
+  const angle = (Math.PI / 180) * (x / 10 - 50);
+  const curveX = x + Math.sin(angle) * radius * 0.3;
+  const curveY = y + Math.cos(angle) * radius * 0.5 - 20;
+
+  return (
+    <g transform={`translate(${curveX},${curveY})`}>
+      <text
+        x={0}
+        y={0}
+        dy={4}
+        textAnchor="middle"
+        fill="#666"
+        fontSize={12}
+        transform={`rotate(${-45})`}
+        style={{
+          fontWeight: 500,
+          letterSpacing: '0.5px',
+        }}
+      >
+        {payload.value}
+      </text>
+    </g>
+  );
+};
+
 const IncomeExpenseChart: React.FC<IncomeExpenseChartProps> = ({
   data,
   title,
@@ -47,9 +76,9 @@ const IncomeExpenseChart: React.FC<IncomeExpenseChartProps> = ({
       <Box sx={{ width: '100%', height: 450 }}>
         <ResponsiveContainer width="100%" height="100%">
           {chartType === 'bar' ? (
-            <BarChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 80 }}>
+            <BarChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 100 }}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" angle={-45} textAnchor="end" height={100} />
+              <XAxis dataKey="month" tick={<CurvedTick />} height={120} />
               <YAxis tickFormatter={formatCurrency} />
               <Tooltip
                 formatter={(value: any) => formatCurrency(value)}
@@ -60,9 +89,9 @@ const IncomeExpenseChart: React.FC<IncomeExpenseChartProps> = ({
               <Bar dataKey="expense" fill="#f44336" name="Expense" />
             </BarChart>
           ) : (
-            <LineChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 80 }}>
+            <LineChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 100 }}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" angle={-45} textAnchor="end" height={100} />
+              <XAxis dataKey="month" tick={<CurvedTick />} height={120} />
               <YAxis tickFormatter={formatCurrency} />
               <Tooltip
                 formatter={(value: any) => formatCurrency(value)}
