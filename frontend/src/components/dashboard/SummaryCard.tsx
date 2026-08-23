@@ -3,6 +3,7 @@ import { Card, CardContent, Typography, Box } from '@mui/material';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import { formatINR } from '../../utils/currency';
 
 interface SummaryCardProps {
   title: string;
@@ -12,13 +13,7 @@ interface SummaryCardProps {
 }
 
 const SummaryCard: React.FC<SummaryCardProps> = ({ title, amount, type, icon }) => {
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 2,
-    }).format(value);
-  };
+  const formatCurrency = (value: number) => formatINR(value);
 
   const getColor = () => {
     switch (type) {

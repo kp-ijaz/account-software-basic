@@ -1,3 +1,4 @@
+import { formatINR } from '../../utils/currency';
 import React from 'react';
 import {
   Table,
@@ -49,11 +50,7 @@ const DayBookTable: React.FC<DayBookTableProps> = ({
   }
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 2,
-    }).format(amount);
+    return formatINR(amount);
   };
 
   return (

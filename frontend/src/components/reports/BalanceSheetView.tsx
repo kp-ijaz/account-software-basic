@@ -10,19 +10,14 @@ import {
   Typography,
 } from '@mui/material';
 import { BalanceSheetData } from '../../types/reports';
+import { formatINR } from '../../utils/currency';
 
 interface BalanceSheetViewProps {
   balanceSheet: BalanceSheetData['data'];
 }
 
 const BalanceSheetView: React.FC<BalanceSheetViewProps> = ({ balanceSheet }) => {
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 2,
-    }).format(amount);
-  };
+  const formatCurrency = (amount: number) => formatINR(amount);
 
   const { assets, liabilities, equity, asOf } = balanceSheet;
 

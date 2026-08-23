@@ -2,6 +2,7 @@ import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { Paper, Box, Typography, Table, TableBody, TableCell, TableHead, TableRow, useMediaQuery, useTheme } from '@mui/material';
 import { CategoryBreakdown } from '../../types/dashboard';
+import { formatINR } from '../../utils/currency';
 
 interface CategoryBreakdownChartProps {
   data: CategoryBreakdown[];
@@ -28,13 +29,7 @@ const CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = ({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 2,
-    }).format(value);
-  };
+  const formatCurrency = (value: number) => formatINR(value);
 
   if (!data || data.length === 0) {
     return (

@@ -22,6 +22,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { Expense } from '../../types/expense';
 import expenseService from '../../services/expenseService';
+import { formatINR } from '../../utils/currency';
 
 interface ExpenseTableProps {
   expenses: Expense[];
@@ -74,13 +75,7 @@ const ExpenseTable: React.FC<ExpenseTableProps> = ({ expenses, loading, onEdit, 
     );
   }
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 2,
-    }).format(amount);
-  };
+  const formatCurrency = (amount: number) => formatINR(amount);
 
   return (
     <>

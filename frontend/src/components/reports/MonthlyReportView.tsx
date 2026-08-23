@@ -14,19 +14,14 @@ import {
   CardContent,
 } from '@mui/material';
 import { MonthlyReportData } from '../../types/reports';
+import { formatINR } from '../../utils/currency';
 
 interface MonthlyReportViewProps {
   report: MonthlyReportData['data'];
 }
 
 const MonthlyReportView: React.FC<MonthlyReportViewProps> = ({ report }) => {
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 2,
-    }).format(amount);
-  };
+  const formatCurrency = (amount: number) => formatINR(amount);
 
   const { summary, transactions, incomeByCategory, expenseByCategory } = report;
 

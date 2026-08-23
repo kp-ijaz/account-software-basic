@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { DashboardTransaction } from '../../types/dashboard';
+import { formatINR } from '../../utils/currency';
 
 interface RecentTransactionsProps {
   transactions: DashboardTransaction[];
@@ -24,13 +25,7 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({ transactions, l
   const navigate = useNavigate();
   const displayTransactions = transactions.slice(0, limit);
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 2,
-    }).format(amount);
-  };
+  const formatCurrency = (amount: number) => formatINR(amount);
 
   if (displayTransactions.length === 0) {
     return (

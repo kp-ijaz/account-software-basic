@@ -14,19 +14,14 @@ import {
   Grid,
 } from '@mui/material';
 import { YearlyReportData } from '../../types/reports';
+import { formatINR } from '../../utils/currency';
 
 interface YearlyReportViewProps {
   report: YearlyReportData['data'];
 }
 
 const YearlyReportView: React.FC<YearlyReportViewProps> = ({ report }) => {
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 2,
-    }).format(amount);
-  };
+  const formatCurrency = (amount: number) => formatINR(amount);
 
   return (
     <Box>

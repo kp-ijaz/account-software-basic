@@ -13,6 +13,7 @@ import {
   Chip,
 } from '@mui/material';
 import { LedgerEntry } from '../../types/ledger';
+import { formatINR } from '../../utils/currency';
 
 interface LedgerTableProps {
   entries: LedgerEntry[];
@@ -49,13 +50,7 @@ const LedgerTable: React.FC<LedgerTableProps> = ({
     );
   }
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 2,
-    }).format(amount);
-  };
+  const formatCurrency = (amount: number) => formatINR(amount);
 
   return (
     <TableContainer component={Paper}>
