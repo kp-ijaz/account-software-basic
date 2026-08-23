@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
+import TokenManager from '../utils/tokenManager';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -15,7 +16,7 @@ const api: AxiosInstance = axios.create({
 api.interceptors.request.use(
   (config) => {
     // Add auth token if available
-    const token = localStorage.getItem('auth_token');
+    const token = TokenManager.getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -34,7 +35,8 @@ api.interceptors.response.use(
   (error: AxiosError) => {
     if (error.response?.status === 401) {
       // Unauthorized - clear auth and redirect to login
-      localStorage.removeItem('auth_token');
+      TokenManager.clearAuth();
+      // Force page reload to trigger auth reinitialization
       window.location.href = '/login';
     }
     return Promise.reject(error);

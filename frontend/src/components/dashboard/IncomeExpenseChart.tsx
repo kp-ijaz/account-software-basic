@@ -20,27 +20,24 @@ interface IncomeExpenseChartProps {
   chartType?: 'bar' | 'line';
 }
 
-// Custom curved tick component for labels
-const CurvedTick = (props: any) => {
+// Custom angled tick component for labels at 75 degrees
+const AngleTick = (props: any) => {
   const { x, y, payload } = props;
-  const radius = 80;
-  const angle = (Math.PI / 180) * (x / 10 - 50);
-  const curveX = x + Math.sin(angle) * radius * 0.3;
-  const curveY = y + Math.cos(angle) * radius * 0.5 - 20;
 
   return (
-    <g transform={`translate(${curveX},${curveY})`}>
+    <g transform={`translate(${x},${y})`}>
       <text
         x={0}
         y={0}
         dy={4}
-        textAnchor="middle"
-        fill="#666"
-        fontSize={12}
-        transform={`rotate(${-45})`}
+        textAnchor="end"
+        dominantBaseline="middle"
+        fill="#555"
+        fontSize={13}
+        transform={`rotate(-75)`}
         style={{
           fontWeight: 500,
-          letterSpacing: '0.5px',
+          letterSpacing: '0.3px',
         }}
       >
         {payload.value}
@@ -78,7 +75,7 @@ const IncomeExpenseChart: React.FC<IncomeExpenseChartProps> = ({
           {chartType === 'bar' ? (
             <BarChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 100 }}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" tick={<CurvedTick />} height={120} />
+              <XAxis dataKey="month" tick={<AngleTick />} height={120} />
               <YAxis tickFormatter={formatCurrency} />
               <Tooltip
                 formatter={(value: any) => formatCurrency(value)}
@@ -91,7 +88,7 @@ const IncomeExpenseChart: React.FC<IncomeExpenseChartProps> = ({
           ) : (
             <LineChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 100 }}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" tick={<CurvedTick />} height={120} />
+              <XAxis dataKey="month" tick={<AngleTick />} height={120} />
               <YAxis tickFormatter={formatCurrency} />
               <Tooltip
                 formatter={(value: any) => formatCurrency(value)}

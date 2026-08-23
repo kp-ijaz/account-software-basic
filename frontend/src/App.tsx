@@ -7,6 +7,7 @@ import { useSelector } from 'react-redux';
 import { useMediaQuery, useTheme } from '@mui/material';
 import { RootState } from './store';
 import { theme } from './styles/theme';
+import { useAuthInit } from './hooks/useAuthInit';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import TransactionsPage from './pages/TransactionsPage';
@@ -34,6 +35,9 @@ const ResponsiveLayout = ({ children, title }: { children: React.ReactNode; titl
 };
 
 function App() {
+  // Initialize auth state from localStorage on app load
+  useAuthInit();
+
   const { isAuthenticated, loading } = useSelector(
     (state: RootState) => state.auth
   );

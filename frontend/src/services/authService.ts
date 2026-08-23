@@ -1,5 +1,6 @@
 import api from './api';
 import { LoginRequest, LoginResponse, ChangePasswordRequest } from '../types/auth';
+import TokenManager from '../utils/tokenManager';
 
 class AuthService {
   /**
@@ -9,9 +10,9 @@ class AuthService {
     try {
       const response = await api.post<LoginResponse>('/auth/login', data);
 
-      if (response.data.success && response.data.data?.token) {
-        // Store token in localStorage
-        localStorage.setItem('auth_token', response.data.data.token);
+      if (response.data.success && response.data.data?.token && response.data.data?.user) {
+        // Store token and user using TokenManager
+        TokenManager.saveAuthData(response.data.data.token, response.data.data.user);
       }
 
       return response.data;
@@ -29,7 +30,7 @@ class AuthService {
       await api.post('/auth/logout');
     } finally {
       // Always clear token even if logout fails
-      localStorage.removeItem('auth_token');
+      TokenManager.clearAuth();
     }
   }
 
@@ -85,14 +86,15 @@ class AuthService {
    * Check if user is authenticated
    */
   isAuthenticated(): boolean {
-    return !!localStorage.getItem('auth_token');
+    const token = TokenManager.getToken();
+    return token ? !TokenManager.isTokenExpired(token) : false;
   }
 
   /**
    * Get token from localStorage
    */
   getToken(): string | null {
-    return localStorage.getItem('auth_token');
+    return TokenManager.getToken();
   }
 }
 
