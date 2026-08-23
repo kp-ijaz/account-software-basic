@@ -14,13 +14,35 @@ interface AuthState {
   error: string | null;
 }
 
-const initialState: AuthState = {
-  isAuthenticated: false,
-  user: null,
-  token: null,
-  loading: false,
-  error: null,
+// Try to restore auth from localStorage on initial load
+const getInitialState = (): AuthState => {
+  try {
+    const storedToken = localStorage.getItem('auth_token');
+    const storedUser = localStorage.getItem('auth_user');
+
+    if (storedToken && storedUser) {
+      return {
+        isAuthenticated: true,
+        user: JSON.parse(storedUser),
+        token: storedToken,
+        loading: true, // Set loading while we validate
+        error: null,
+      };
+    }
+  } catch (error) {
+    console.error('Failed to restore auth:', error);
+  }
+
+  return {
+    isAuthenticated: false,
+    user: null,
+    token: null,
+    loading: false,
+    error: null,
+  };
 };
+
+const initialState: AuthState = getInitialState();
 
 const authSlice = createSlice({
   name: 'auth',
