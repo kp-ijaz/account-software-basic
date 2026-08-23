@@ -61,7 +61,7 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({ children, title = 'Madrasa'
       onClick: () => { navigate('/settings'); setDrawerOpen(false); }
     },
     {
-      label: 'Audit Log',
+      label: 'Audit Trail',
       icon: <AuditIcon sx={{ fontSize: 20 }} />,
       onClick: () => { navigate('/audit'); setDrawerOpen(false); }
     },

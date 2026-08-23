@@ -4,9 +4,12 @@ export interface AuditLogEntry {
   description: string;
   userId: string;
   userEmail?: string;
-  entityType?: string;
-  entityId?: string;
-  changes?: Record<string, any>;
+  tableName?: string;
+  recordId?: string;
+  transactionId?: string;
+  oldValues?: Record<string, unknown> | null;
+  newValues?: Record<string, unknown> | null;
+  changes?: Record<string, unknown>;
   ipAddress?: string;
   userAgent?: string;
   createdAt: string;
@@ -16,6 +19,7 @@ export interface AuditLogFilterParams {
   page?: number;
   pageSize?: number;
   action?: string;
+  module?: string;
   startDate?: string;
   endDate?: string;
   userId?: string;
@@ -68,3 +72,26 @@ export const AUDIT_ACTIONS = {
   SETTINGS_UPDATED: 'SETTINGS_UPDATED',
   REPORT_GENERATED: 'REPORT_GENERATED',
 } as const;
+
+export const AUDIT_ACTION_LABELS: Record<string, string> = {
+  LOGIN: 'Signed in',
+  LOGOUT: 'Signed out',
+  CHANGE_PASSWORD: 'Password changed',
+  INCOME_CREATED: 'Income created',
+  INCOME_UPDATED: 'Income modified',
+  INCOME_DELETED: 'Income deleted',
+  EXPENSE_CREATED: 'Expense created',
+  EXPENSE_UPDATED: 'Expense modified',
+  EXPENSE_DELETED: 'Expense deleted',
+  SETTINGS_UPDATED: 'Settings updated',
+  REPORT_GENERATED: 'Report generated',
+};
+
+export const AUDIT_MODULES = [
+  { value: '', label: 'All modules' },
+  { value: 'income', label: 'Income' },
+  { value: 'expense', label: 'Expense' },
+  { value: 'security', label: 'Login & security' },
+  { value: 'settings', label: 'Settings' },
+  { value: 'reports', label: 'Reports' },
+];

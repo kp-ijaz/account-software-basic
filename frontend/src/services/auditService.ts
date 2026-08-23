@@ -10,6 +10,7 @@ class AuditService {
         if (filters.page) params.append('page', filters.page.toString());
         if (filters.pageSize) params.append('pageSize', filters.pageSize.toString());
         if (filters.action) params.append('action', filters.action);
+        if (filters.module) params.append('module', filters.module);
         if (filters.startDate) params.append('startDate', filters.startDate);
         if (filters.endDate) params.append('endDate', filters.endDate);
         if (filters.userId) params.append('userId', filters.userId);

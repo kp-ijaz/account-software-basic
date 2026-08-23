@@ -51,7 +51,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
     { label: 'Ledger', icon: <LedgerIcon sx={{ fontSize: 20 }} />, path: '/ledger', id: 'ledger' },
     { label: 'Reports', icon: <ReportsIcon sx={{ fontSize: 20 }} />, path: '/reports', id: 'reports' },
     { label: 'Settings', icon: <SettingsIcon sx={{ fontSize: 20 }} />, path: '/settings', id: 'settings' },
-    { label: 'Audit Log', icon: <AuditIcon sx={{ fontSize: 20 }} />, path: '/audit', id: 'audit' },
+    { label: 'Audit Trail', icon: <AuditIcon sx={{ fontSize: 20 }} />, path: '/audit', id: 'audit' },
   ];
 
   const handleNavigate = (path: string) => {

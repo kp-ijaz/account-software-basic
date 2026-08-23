@@ -8,6 +8,7 @@ export const getAuditLogs = async (req: Request, res: Response, next: NextFuncti
       page: req.query.page ? parseInt(req.query.page as string) : 1,
       pageSize: req.query.pageSize ? parseInt(req.query.pageSize as string) : 50,
       action: req.query.action as string,
+      module: req.query.module as string,
       startDate: req.query.startDate as string,
       endDate: req.query.endDate as string,
       userId: req.query.userId as string,

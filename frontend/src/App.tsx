@@ -129,7 +129,7 @@ function App() {
             path="/audit"
             element={
               <PrivateRoute>
-                <ResponsiveLayout title="Audit Log">
+                <ResponsiveLayout title="Audit Trail">
                   <AuditLogPage />
                 </ResponsiveLayout>
               </PrivateRoute>

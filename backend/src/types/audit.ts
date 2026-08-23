@@ -6,7 +6,9 @@ export interface AuditLogEntry {
   userEmail?: string;
   tableName?: string;
   recordId?: string;
-  changes?: any;
+  transactionId?: string;
+  oldValues?: Record<string, unknown> | null;
+  newValues?: Record<string, unknown> | null;
   ipAddress?: string;
   userAgent?: string;
   createdAt: string;
@@ -16,6 +18,7 @@ export interface AuditLogFilterParams {
   page?: number;
   pageSize?: number;
   action?: string;
+  module?: string;
   startDate?: string;
   endDate?: string;
   userId?: string;
