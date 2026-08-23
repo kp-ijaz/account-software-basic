@@ -16,8 +16,8 @@ class ExpenseService {
   async createExpense(input: CreateExpenseRequest, userId: string): Promise<ExpenseResponse> {
     try {
       // Validate input
-      if (!input.date || !input.categoryId || !input.description || input.amount <= 0) {
-        throw new ApiError(400, 'All fields are required and amount must be greater than zero');
+      if (!input.date || !input.categoryId || input.amount <= 0) {
+        throw new ApiError(400, 'Date, category, and amount (greater than zero) are required');
       }
 
       // Verify category exists

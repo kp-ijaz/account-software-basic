@@ -25,7 +25,7 @@ import categoryService from '../../services/categoryService';
 const incomeSchema = z.object({
   date: z.string().min(1, 'Date is required'),
   categoryId: z.string().min(1, 'Category is required'),
-  description: z.string().min(1, 'Description is required').max(255, 'Description too long').optional(),
+  description: z.string().max(255, 'Description too long').optional(),
   amount: z.coerce.number().gt(0, 'Amount must be greater than zero'),
   paymentMethod: z.enum(['CASH', 'BANK']),
   reference: z.string().optional(),
