@@ -1,17 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Container,
   Box,
   Typography,
   Button,
-  Tabs,
-  Tab,
   Paper,
   CircularProgress,
   Alert,
   Grid,
-  TextField,
   FormControl,
   InputLabel,
   Select,
@@ -35,20 +32,16 @@ import reportService from '../services/reportService';
 import MonthlyReportView from '../components/reports/MonthlyReportView';
 import YearlyReportView from '../components/reports/YearlyReportView';
 import BalanceSheetView from '../components/reports/BalanceSheetView';
-
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
-
-const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => {
-  return (
-    <div hidden={value !== index} role="tabpanel">
-      {value === index && <Box sx={{ pt: 3 }}>{children}</Box>}
-    </div>
-  );
-};
+import {
+  printReport,
+  downloadReportPDF,
+  getMonthlyReportFilename,
+  getYearlyReportFilename,
+  getBalanceSheetFilename,
+  getMonthlyReportTitle,
+  getYearlyReportTitle,
+  getBalanceSheetTitle,
+} from '../utils/reportExport';
 
 const ReportsPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -63,12 +56,14 @@ const ReportsPage: React.FC = () => {
   } = useSelector((state: RootState) => state.reports);
 
   const [tabValue, setTabValue] = useState(0);
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
+  const reportRef = useRef<HTMLDivElement>(null);
   const currentYear = new Date().getFullYear();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   useEffect(() => {
-    // Load monthly report on component mount
     loadMonthlyReport(selectedMonth, selectedYear);
     loadYearlyReport(selectedYear);
     loadBalanceSheet();
@@ -121,19 +116,103 @@ const ReportsPage: React.FC = () => {
     loadYearlyReport(year);
   };
 
-  const handlePrint = () => {
-    window.print();
+  const getActiveReportMeta = () => {
+    if (tabValue === 0) {
+      return {
+        title: getMonthlyReportTitle(selectedMonth, selectedYear),
+        filename: getMonthlyReportFilename(selectedMonth, selectedYear),
+        hasData: !!monthlyReport,
+      };
+    }
+
+    if (tabValue === 1) {
+      return {
+        title: getYearlyReportTitle(selectedYear),
+        filename: getYearlyReportFilename(selectedYear),
+        hasData: !!yearlyReport,
+      };
+    }
+
+    return {
+      title: getBalanceSheetTitle(balanceSheet?.asOf),
+      filename: getBalanceSheetFilename(balanceSheet?.asOf),
+      hasData: !!balanceSheet,
+    };
   };
 
-  const handleDownloadPDF = () => {
-    reportService.downloadAsPDF(`Report_${selectedMonth}_${selectedYear}.pdf`);
+  const handlePrint = async () => {
+    const { title, hasData } = getActiveReportMeta();
+
+    if (!hasData || !reportRef.current) {
+      setExportError('Report data is not ready yet. Please wait for it to load.');
+      return;
+    }
+
+    try {
+      setExporting(true);
+      setExportError(null);
+      await printReport(reportRef.current, title);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to print report';
+      setExportError(message);
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleDownloadPDF = async () => {
+    const { filename, hasData } = getActiveReportMeta();
+
+    if (!hasData || !reportRef.current) {
+      setExportError('Report data is not ready yet. Please wait for it to load.');
+      return;
+    }
+
+    try {
+      setExporting(true);
+      setExportError(null);
+      await downloadReportPDF(reportRef.current, filename);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to download PDF';
+      setExportError(message);
+    } finally {
+      setExporting(false);
+    }
   };
 
   const years = Array.from({ length: 10 }, (_, i) => currentYear - i);
 
+  const renderReportActions = () => (
+    <>
+      <Grid item xs={12} sm={6} md={3}>
+        <Button
+          variant="outlined"
+          startIcon={exporting ? <CircularProgress size={18} /> : <PrintIcon />}
+          onClick={handlePrint}
+          disabled={exporting || loading}
+          fullWidth
+        >
+          Print
+        </Button>
+      </Grid>
+
+      <Grid item xs={12} sm={6} md={3}>
+        <Button
+          variant="outlined"
+          startIcon={exporting ? <CircularProgress size={18} /> : <FileDownloadIcon />}
+          onClick={handleDownloadPDF}
+          disabled={exporting || loading}
+          fullWidth
+        >
+          Download PDF
+        </Button>
+      </Grid>
+    </>
+  );
+
   return (
     <Container maxWidth="lg" sx={{ py: 3 }}>
-      <Box sx={{ mb: 3 }}>
+      <Box className="no-print" sx={{ mb: 3 }}>
         <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
           Financial Reports
         </Typography>
@@ -143,25 +222,36 @@ const ReportsPage: React.FC = () => {
       </Box>
 
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
+        <Alert severity="error" className="no-print" sx={{ mb: 2 }}>
           {error}
         </Alert>
       )}
 
-      {/* Tab Navigation - Mobile Only */}
+      {exportError && (
+        <Alert severity="error" className="no-print" sx={{ mb: 2 }} onClose={() => setExportError(null)}>
+          {exportError}
+        </Alert>
+      )}
+
       {isMobile && (
-        <Paper sx={{ mb: 3 }}>
-          <Tabs value={tabValue} onChange={(_, value) => setTabValue(value)}>
-            <Tab label="Monthly Report" />
-            <Tab label="Yearly Report" />
-            <Tab label="Balance Sheet" />
-          </Tabs>
+        <Paper className="no-print" sx={{ mb: 3 }}>
+          <Box sx={{ display: 'flex', gap: 1, p: 1, flexWrap: 'wrap' }}>
+            {['Monthly Report', 'Yearly Report', 'Balance Sheet'].map((label, index) => (
+              <Button
+                key={label}
+                variant={tabValue === index ? 'contained' : 'outlined'}
+                size="small"
+                onClick={() => setTabValue(index)}
+              >
+                {label}
+              </Button>
+            ))}
+          </Box>
         </Paper>
       )}
 
-      {/* Report Selection on Desktop */}
       {!isMobile && (
-        <Box sx={{ mb: 3 }}>
+        <Box className="no-print" sx={{ mb: 3 }}>
           <Button
             variant={tabValue === 0 ? 'contained' : 'outlined'}
             onClick={() => setTabValue(0)}
@@ -185,171 +275,111 @@ const ReportsPage: React.FC = () => {
         </Box>
       )}
 
-      {/* Monthly Report - Show when selected (tabValue === 0) */}
       {tabValue === 0 && (
-      <Box>
-        {/* Month/Year Selection */}
-        <Grid container spacing={2} sx={{ mb: 3 }}>
-          <Grid item xs={12} sm={6} md={3}>
-            <FormControl fullWidth size="small">
-              <InputLabel>Month</InputLabel>
-              <Select
-                value={selectedMonth}
-                label="Month"
-                onChange={(e) => handleMonthChange(e.target.value as number)}
-              >
-                {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
-                  <MenuItem key={month} value={month}>
-                    {new Date(selectedYear, month - 1).toLocaleString('default', {
-                      month: 'long',
-                    })}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+        <Box>
+          <Grid container spacing={2} className="no-print" sx={{ mb: 3 }}>
+            <Grid item xs={12} sm={6} md={3}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Month</InputLabel>
+                <Select
+                  value={selectedMonth}
+                  label="Month"
+                  onChange={(e) => handleMonthChange(e.target.value as number)}
+                >
+                  {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
+                    <MenuItem key={month} value={month}>
+                      {new Date(selectedYear, month - 1).toLocaleString('default', {
+                        month: 'long',
+                      })}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} sm={6} md={3}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Year</InputLabel>
+                <Select
+                  value={selectedYear}
+                  label="Year"
+                  onChange={(e) => handleYearChange(e.target.value as number)}
+                >
+                  {years.map((year) => (
+                    <MenuItem key={year} value={year}>
+                      {year}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+
+            {renderReportActions()}
           </Grid>
 
-          <Grid item xs={12} sm={6} md={3}>
-            <FormControl fullWidth size="small">
-              <InputLabel>Year</InputLabel>
-              <Select
-                value={selectedYear}
-                label="Year"
-                onChange={(e) => handleYearChange(e.target.value as number)}
-              >
-                {years.map((year) => (
-                  <MenuItem key={year} value={year}>
-                    {year}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-
-          <Grid item xs={12} sm={6} md={3}>
-            <Button
-              variant="outlined"
-              startIcon={<PrintIcon />}
-              onClick={handlePrint}
-              fullWidth
-            >
-              Print
-            </Button>
-          </Grid>
-
-          <Grid item xs={12} sm={6} md={3}>
-            <Button
-              variant="outlined"
-              startIcon={<FileDownloadIcon />}
-              onClick={handleDownloadPDF}
-              fullWidth
-            >
-              Download PDF
-            </Button>
-          </Grid>
-        </Grid>
-
-        {loading ? (
-          <Box display="flex" justifyContent="center" p={3}>
-            <CircularProgress />
-          </Box>
-        ) : monthlyReport ? (
-          <MonthlyReportView report={monthlyReport} />
-        ) : null}
-      </Box>
+          {loading ? (
+            <Box display="flex" justifyContent="center" p={3}>
+              <CircularProgress />
+            </Box>
+          ) : monthlyReport ? (
+            <Box ref={reportRef} id="report-print-content" className="report-print-content">
+              <MonthlyReportView report={monthlyReport} />
+            </Box>
+          ) : null}
+        </Box>
       )}
 
-      {/* Yearly Report - Show when selected (tabValue === 1) */}
       {tabValue === 1 && (
-      <Box>
-        {/* Year Selection */}
-        <Grid container spacing={2} sx={{ mb: 3 }}>
-          <Grid item xs={12} sm={6} md={3}>
-            <FormControl fullWidth size="small">
-              <InputLabel>Year</InputLabel>
-              <Select
-                value={selectedYear}
-                label="Year"
-                onChange={(e) => handleYearChange(e.target.value as number)}
-              >
-                {years.map((year) => (
-                  <MenuItem key={year} value={year}>
-                    {year}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+        <Box>
+          <Grid container spacing={2} className="no-print" sx={{ mb: 3 }}>
+            <Grid item xs={12} sm={6} md={3}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Year</InputLabel>
+                <Select
+                  value={selectedYear}
+                  label="Year"
+                  onChange={(e) => handleYearChange(e.target.value as number)}
+                >
+                  {years.map((year) => (
+                    <MenuItem key={year} value={year}>
+                      {year}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+
+            {renderReportActions()}
           </Grid>
 
-          <Grid item xs={12} sm={6} md={3}>
-            <Button
-              variant="outlined"
-              startIcon={<PrintIcon />}
-              onClick={handlePrint}
-              fullWidth
-            >
-              Print
-            </Button>
-          </Grid>
-
-          <Grid item xs={12} sm={6} md={3}>
-            <Button
-              variant="outlined"
-              startIcon={<FileDownloadIcon />}
-              onClick={handleDownloadPDF}
-              fullWidth
-            >
-              Download PDF
-            </Button>
-          </Grid>
-        </Grid>
-
-        {loading ? (
-          <Box display="flex" justifyContent="center" p={3}>
-            <CircularProgress />
-          </Box>
-        ) : yearlyReport ? (
-          <YearlyReportView report={yearlyReport} />
-        ) : null}
-      </Box>
+          {loading ? (
+            <Box display="flex" justifyContent="center" p={3}>
+              <CircularProgress />
+            </Box>
+          ) : yearlyReport ? (
+            <Box ref={reportRef} id="report-print-content" className="report-print-content">
+              <YearlyReportView report={yearlyReport} />
+            </Box>
+          ) : null}
+        </Box>
       )}
 
-      {/* Balance Sheet - Show when selected (tabValue === 2) */}
       {tabValue === 2 && (
-      <Box>
-        {/* Actions */}
-        <Grid container spacing={2} sx={{ mb: 3 }}>
-          <Grid item xs={12} sm={6} md={3}>
-            <Button
-              variant="outlined"
-              startIcon={<PrintIcon />}
-              onClick={handlePrint}
-              fullWidth
-            >
-              Print
-            </Button>
+        <Box>
+          <Grid container spacing={2} className="no-print" sx={{ mb: 3 }}>
+            {renderReportActions()}
           </Grid>
 
-          <Grid item xs={12} sm={6} md={3}>
-            <Button
-              variant="outlined"
-              startIcon={<FileDownloadIcon />}
-              onClick={handleDownloadPDF}
-              fullWidth
-            >
-              Download PDF
-            </Button>
-          </Grid>
-        </Grid>
-
-        {loading ? (
-          <Box display="flex" justifyContent="center" p={3}>
-            <CircularProgress />
-          </Box>
-        ) : balanceSheet ? (
-          <BalanceSheetView balanceSheet={balanceSheet} />
-        ) : null}
-      </Box>
+          {loading ? (
+            <Box display="flex" justifyContent="center" p={3}>
+              <CircularProgress />
+            </Box>
+          ) : balanceSheet ? (
+            <Box ref={reportRef} id="report-print-content" className="report-print-content">
+              <BalanceSheetView balanceSheet={balanceSheet} />
+            </Box>
+          ) : null}
+        </Box>
       )}
     </Container>
   );

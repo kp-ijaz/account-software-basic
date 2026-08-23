@@ -32,6 +32,7 @@ const MobileBottomNav: React.FC = () => {
 
   return (
     <Paper
+      className="no-print"
       sx={{
         position: 'fixed',
         bottom: 0,

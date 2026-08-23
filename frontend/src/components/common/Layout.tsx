@@ -9,7 +9,6 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: '#f8f9fa' }}>
-      {/* Sidebar */}
       <Sidebar open={false} />
 
       {/* Main Content */}

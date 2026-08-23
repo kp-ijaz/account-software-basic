@@ -69,3 +69,46 @@ body {
 .slide-in {
   animation: slideIn 0.3s ease-in-out;
 }
+
+/* Report print/export helpers */
+@media print {
+  .no-print,
+  .MuiDrawer-root,
+  .MuiAppBar-root,
+  nav {
+    display: none !important;
+  }
+
+  html,
+  body,
+  #root {
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .report-print-content,
+  .report-print-content * {
+    visibility: visible;
+  }
+
+  .report-print-content {
+    display: block !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+
+  @page {
+    margin: 12mm;
+  }
+}

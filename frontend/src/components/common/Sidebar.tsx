@@ -210,6 +210,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
       {/* Desktop Sidebar */}
       <Drawer
         variant="permanent"
+        className="no-print"
         sx={{
           width: DRAWER_WIDTH,
           flexShrink: 0,

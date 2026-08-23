@@ -33,27 +33,6 @@ class ReportService {
       throw new Error(message);
     }
   }
-
-  generatePDF(html: string, filename: string) {
-    // This will be implemented using html2pdf or similar
-    // For now, we'll create a simple PDF download
-    const element = document.createElement('div');
-    element.innerHTML = html;
-
-    // Using native browser print
-    const printWindow = window.open('', '', 'width=900,height=600');
-    if (printWindow) {
-      printWindow.document.write(html);
-      printWindow.document.close();
-      printWindow.print();
-    }
-  }
-
-  downloadAsPDF(reportName: string) {
-    // Placeholder for actual PDF generation
-    // Will be implemented with html2pdf library
-    console.log(`Downloading ${reportName} as PDF`);
-  }
 }
 
 export default new ReportService();

@@ -77,6 +77,7 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({ children, title = 'Madrasa'
     }}>
       {/* Top App Bar */}
       <AppBar
+        className="no-print"
         position="sticky"
         sx={{
           bgcolor: '#ffffff',
@@ -110,6 +111,7 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({ children, title = 'Madrasa'
 
       {/* Side Drawer Menu */}
       <Drawer
+        className="no-print"
         anchor="left"
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}

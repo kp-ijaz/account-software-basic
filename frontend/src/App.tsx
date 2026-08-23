@@ -20,7 +20,7 @@ import SettingsPage from './pages/SettingsPage';
 import PrivateRoute from './components/common/PrivateRoute';
 import Layout from './components/common/Layout';
 import MobileLayout from './components/mobile/MobileLayout';
-import PWAPrompt from './components/pwa/PWAPrompt';
+import PWAStatus from './components/pwa/PWAStatus';
 
 const ResponsiveLayout = ({ children, title }: { children: React.ReactNode; title?: string }) => {
   const muiTheme = useTheme();
@@ -54,7 +54,7 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <PWAPrompt />
+      <PWAStatus />
       <Router>
         <Routes>
           <Route path="/login" element={<LoginPage />} />

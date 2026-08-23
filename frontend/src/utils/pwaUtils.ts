@@ -2,20 +2,17 @@
  * PWA Utilities for service worker management and offline detection
  */
 
-export interface UpdatePrompt {
-  show: () => Promise<{ outcome: 'accepted' | 'dismissed' }>;
-}
-
-let deferredPrompt: UpdatePrompt | null = null;
 let updateAvailable = false;
 
 /**
  * Check if the app is running as a PWA
  */
 export const isPWA = (): boolean => {
-  return window.matchMedia('(display-mode: standalone)').matches ||
-    (navigator as any).standalone === true ||
-    document.referrer.includes('android-app://');
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    (navigator as Navigator & { standalone?: boolean }).standalone === true ||
+    document.referrer.includes('android-app://')
+  );
 };
 
 /**
@@ -23,43 +20,6 @@ export const isPWA = (): boolean => {
  */
 export const isServiceWorkerSupported = (): boolean => {
   return 'serviceWorker' in navigator;
-};
-
-/**
- * Handle beforeinstallprompt event
- */
-export const setupInstallPrompt = (callback?: (prompt: UpdatePrompt) => void) => {
-  if (!isServiceWorkerSupported()) return;
-
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e as unknown as UpdatePrompt;
-    console.log('✅ Install prompt ready');
-    if (callback) {
-      callback(deferredPrompt);
-    }
-  });
-};
-
-/**
- * Show install prompt
- */
-export const showInstallPrompt = async (): Promise<boolean> => {
-  if (!deferredPrompt) {
-    return false;
-  }
-
-  try {
-    const { outcome } = await deferredPrompt.show();
-    if (outcome === 'accepted') {
-      console.log('✅ App installed');
-      deferredPrompt = null;
-      return true;
-    }
-  } catch (error) {
-    console.error('Install prompt error:', error);
-  }
-  return false;
 };
 
 /**
@@ -77,12 +37,10 @@ export const setupOfflineDetection = (
   onOffline?: () => void
 ) => {
   window.addEventListener('online', () => {
-    console.log('🌐 Back online');
     if (onOnline) onOnline();
   });
 
   window.addEventListener('offline', () => {
-    console.log('📡 Gone offline');
     if (onOffline) onOffline();
   });
 };
@@ -102,7 +60,6 @@ export const checkForUpdates = async (
     const update = await registration.update();
     if (update && update.installing) {
       updateAvailable = true;
-      console.log('✅ Update available');
       if (onUpdateAvailable) {
         onUpdateAvailable();
       }
@@ -124,9 +81,7 @@ export const skipWaitingAndReload = async (): Promise<void> => {
   if (registration?.waiting) {
     registration.waiting.postMessage({ type: 'SKIP_WAITING' });
 
-    // Reload when the new service worker takes over
     navigator.serviceWorker.addEventListener('controllerchange', () => {
-      console.log('🔄 Reloading app with new version...');
       window.location.reload();
     });
   }
@@ -148,10 +103,7 @@ export const clearAPICache = async (): Promise<boolean> => {
         resolve(event.data.success);
       };
 
-      registration.active?.postMessage(
-        { type: 'CLEAR_CACHE' },
-        [messageChannel.port2]
-      );
+      registration.active?.postMessage({ type: 'CLEAR_CACHE' }, [messageChannel.port2]);
     });
   } catch (error) {
     console.error('Cache clear error:', error);
@@ -164,7 +116,6 @@ export const clearAPICache = async (): Promise<boolean> => {
  */
 export const requestNotificationPermission = async (): Promise<boolean> => {
   if (!('Notification' in window)) {
-    console.log('Browser does not support notifications');
     return false;
   }
 
@@ -215,39 +166,28 @@ export const showUpdateNotification = () => {
 };
 
 /**
- * Initialize all PWA features
+ * Initialize PWA features (service worker updates and offline detection).
+ * Install is handled by the browser's native PWA prompt (address bar / menu).
  */
 export const initializePWA = (callbacks?: {
-  onInstallReady?: (prompt: UpdatePrompt) => void;
   onUpdateAvailable?: () => void;
   onOnline?: () => void;
   onOffline?: () => void;
 }) => {
-  console.log('🚀 Initializing PWA...');
-
   if (!isServiceWorkerSupported()) {
-    console.warn('Service Workers not supported');
     return;
   }
 
-  // Setup install prompt
-  setupInstallPrompt(callbacks?.onInstallReady);
-
-  // Setup offline detection
   setupOfflineDetection(callbacks?.onOnline, callbacks?.onOffline);
 
-  // Check for updates periodically
   checkForUpdates(callbacks?.onUpdateAvailable);
   setInterval(() => {
     checkForUpdates(callbacks?.onUpdateAvailable);
-  }, 60000); // Check every minute
-
-  console.log('✅ PWA initialized');
+  }, 60000);
 };
 
-// Log PWA info
 export const logPWAInfo = () => {
-  console.group('📱 PWA Information');
+  console.group('PWA Information');
   console.log('Service Workers Supported:', isServiceWorkerSupported());
   console.log('Running as PWA:', isPWA());
   console.log('Online Status:', isOnline());
