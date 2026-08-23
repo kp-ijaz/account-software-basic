@@ -165,15 +165,82 @@ export const showUpdateNotification = () => {
   }
 };
 
+export interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+}
+
+const INSTALL_DISMISS_KEY = 'pwa-install-dismissed-at';
+const DISMISS_FOR_MS = 7 * 24 * 60 * 60 * 1000;
+
+let deferredInstallPrompt: BeforeInstallPromptEvent | null = null;
+let pwaInitialized = false;
+
+export const isIosDevice = (): boolean => {
+  const ua = window.navigator.userAgent.toLowerCase();
+  return /iphone|ipad|ipod/.test(ua) || (ua.includes('mac') && 'ontouchend' in document);
+};
+
+export const isInstallDismissed = (): boolean => {
+  const raw = localStorage.getItem(INSTALL_DISMISS_KEY);
+  if (!raw) return false;
+  const dismissedAt = Number(raw);
+  if (Number.isNaN(dismissedAt)) return false;
+  return Date.now() - dismissedAt < DISMISS_FOR_MS;
+};
+
+export const dismissInstallPrompt = (): void => {
+  localStorage.setItem(INSTALL_DISMISS_KEY, String(Date.now()));
+};
+
+export const setupInstallPrompt = (
+  onReady?: (event: BeforeInstallPromptEvent) => void
+): void => {
+  window.addEventListener('beforeinstallprompt', (event) => {
+    event.preventDefault();
+    deferredInstallPrompt = event as BeforeInstallPromptEvent;
+    onReady?.(deferredInstallPrompt);
+  });
+
+  window.addEventListener('appinstalled', () => {
+    deferredInstallPrompt = null;
+  });
+};
+
+export const getDeferredInstallPrompt = (): BeforeInstallPromptEvent | null => {
+  return deferredInstallPrompt;
+};
+
+export const showNativeInstallPrompt = async (): Promise<boolean> => {
+  if (!deferredInstallPrompt) return false;
+
+  try {
+    await deferredInstallPrompt.prompt();
+    const { outcome } = await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt = null;
+    return outcome === 'accepted';
+  } catch (error) {
+    console.error('Install prompt error:', error);
+    return false;
+  }
+};
+
 /**
- * Initialize PWA features (service worker updates and offline detection).
- * Install is handled by the browser's native PWA prompt (address bar / menu).
+ * Initialize PWA features (service worker updates, offline detection, install prompt).
  */
 export const initializePWA = (callbacks?: {
   onUpdateAvailable?: () => void;
   onOnline?: () => void;
   onOffline?: () => void;
+  onInstallReady?: (event: BeforeInstallPromptEvent) => void;
 }) => {
+  setupInstallPrompt(callbacks?.onInstallReady);
+
+  if (pwaInitialized) {
+    return;
+  }
+  pwaInitialized = true;
+
   if (!isServiceWorkerSupported()) {
     return;
   }
