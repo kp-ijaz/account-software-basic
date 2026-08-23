@@ -1,6 +1,6 @@
 {
   "name": "Madrasa Accounting Software",
-  "short_name": "Madrasa Accounting",
+  "short_name": "Accounting",
   "description": "Professional accounting management for Islamic institutions - Income, Expenses, Reports, and Financial Analysis",
   "start_url": "/",
   "scope": "/",
@@ -9,12 +9,44 @@
   "background_color": "#ffffff",
   "theme_color": "#1976d2",
   "categories": ["business", "finance"],
+  "screenshots": [
+    {
+      "src": "/icon.svg",
+      "sizes": "540x720",
+      "type": "image/svg+xml",
+      "form_factor": "narrow"
+    }
+  ],
   "icons": [
     {
       "src": "/icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
