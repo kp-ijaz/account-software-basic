@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 import { Income } from '../../types/income';
+import { formatINR } from '../../utils/currency';
 
 interface IncomeTableProps {
   items: Income[];
@@ -79,7 +80,7 @@ export default function IncomeTable({
                 <TableCell>{income.category?.name || '-'}</TableCell>
                 <TableCell>{income.description}</TableCell>
                 <TableCell align="right" sx={{ color: '#2e7d32', fontWeight: 600 }}>
-                  ${parseFloat(income.amount.toString()).toFixed(2)}
+                  {formatINR(parseFloat(income.amount.toString()))}
                 </TableCell>
                 <TableCell>
                   <Box

@@ -25,6 +25,7 @@ import IncomeTable from '../components/income/IncomeTable';
 import incomeService from '../services/incomeService';
 import categoryService from '../services/categoryService';
 import { Income, IncomeCategory } from '../types/income';
+import { formatINR } from '../utils/currency';
 
 export default function IncomePage() {
   const dispatch = useDispatch();
@@ -151,7 +152,7 @@ export default function IncomePage() {
                 Total Income
               </Typography>
               <Typography variant="h5" sx={{ color: 'success.main', fontWeight: 700 }}>
-                $0.00
+                {formatINR(items.reduce((sum, item) => sum + parseFloat(item.amount.toString()), 0))}
               </Typography>
               <Typography variant="caption" color="textSecondary">
                 All time
@@ -167,7 +168,14 @@ export default function IncomePage() {
                 This Month
               </Typography>
               <Typography variant="h5" sx={{ color: 'primary.main', fontWeight: 700 }}>
-                $0.00
+                {formatINR(items
+                  .filter(item => {
+                    const itemDate = new Date(item.date);
+                    const now = new Date();
+                    return itemDate.getMonth() === now.getMonth() && itemDate.getFullYear() === now.getFullYear();
+                  })
+                  .reduce((sum, item) => sum + parseFloat(item.amount.toString()), 0)
+                )}
               </Typography>
               <Typography variant="caption" color="textSecondary">
                 Current month
@@ -199,7 +207,11 @@ export default function IncomePage() {
                 Average Income
               </Typography>
               <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                $0.00
+                {formatINR(
+                  items.length > 0
+                    ? items.reduce((sum, item) => sum + parseFloat(item.amount.toString()), 0) / items.length
+                    : 0
+                )}
               </Typography>
               <Typography variant="caption" color="textSecondary">
                 Per transaction

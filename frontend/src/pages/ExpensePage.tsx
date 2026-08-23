@@ -10,6 +10,8 @@ import {
   CircularProgress,
   Alert,
   Card,
+  CardContent,
+  Grid,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { RootState, AppDispatch } from '../store';
@@ -17,6 +19,7 @@ import expenseService from '../services/expenseService';
 import { setLoading, setError, setExpenses } from '../store/slices/expenseSlice';
 import ExpenseForm from '../components/expense/ExpenseForm';
 import ExpenseTable from '../components/expense/ExpenseTable';
+import { formatINR } from '../utils/currency';
 
 const ExpensePage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -89,6 +92,84 @@ const ExpensePage: React.FC = () => {
           {error}
         </Alert>
       )}
+
+      {/* Summary Cards */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid item xs={12} sm={6} md={3}>
+          <Card>
+            <CardContent>
+              <Typography color="textSecondary" gutterBottom>
+                Total Expense
+              </Typography>
+              <Typography variant="h5" sx={{ color: '#f44336', fontWeight: 700 }}>
+                {formatINR(items.reduce((sum, item) => sum + parseFloat(item.amount.toString()), 0))}
+              </Typography>
+              <Typography variant="caption" color="textSecondary">
+                All time
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={3}>
+          <Card>
+            <CardContent>
+              <Typography color="textSecondary" gutterBottom>
+                This Month
+              </Typography>
+              <Typography variant="h5" sx={{ color: '#ff6f00', fontWeight: 700 }}>
+                {formatINR(items
+                  .filter(item => {
+                    const itemDate = new Date(item.date);
+                    const now = new Date();
+                    return itemDate.getMonth() === now.getMonth() && itemDate.getFullYear() === now.getFullYear();
+                  })
+                  .reduce((sum, item) => sum + parseFloat(item.amount.toString()), 0)
+                )}
+              </Typography>
+              <Typography variant="caption" color="textSecondary">
+                Current month
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={3}>
+          <Card>
+            <CardContent>
+              <Typography color="textSecondary" gutterBottom>
+                Total Transactions
+              </Typography>
+              <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                {total}
+              </Typography>
+              <Typography variant="caption" color="textSecondary">
+                All expense entries
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={3}>
+          <Card>
+            <CardContent>
+              <Typography color="textSecondary" gutterBottom>
+                Average Expense
+              </Typography>
+              <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                {formatINR(
+                  items.length > 0
+                    ? items.reduce((sum, item) => sum + parseFloat(item.amount.toString()), 0) / items.length
+                    : 0
+                )}
+              </Typography>
+              <Typography variant="caption" color="textSecondary">
+                Per transaction
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
 
       <Box sx={{ mb: 2 }}>
         <TextField

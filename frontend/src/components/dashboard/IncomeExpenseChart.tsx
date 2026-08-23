@@ -13,6 +13,7 @@ import {
 } from 'recharts';
 import { Paper, Box, Typography } from '@mui/material';
 import { DashboardChartData } from '../../types/dashboard';
+import { formatINRNumber } from '../../utils/currency';
 
 interface IncomeExpenseChartProps {
   data: DashboardChartData[];
@@ -26,7 +27,7 @@ const IncomeExpenseChart: React.FC<IncomeExpenseChartProps> = ({
   chartType = 'bar',
 }) => {
   const formatCurrency = (value: number) => {
-    return `$${(value / 1000).toFixed(1)}k`;
+    return `₹${(value / 1000).toFixed(1)}k`;
   };
 
   if (!data || data.length === 0) {
