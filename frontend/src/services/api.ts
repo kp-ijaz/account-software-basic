@@ -1,5 +1,7 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import TokenManager from '../utils/tokenManager';
+import { store } from '../store';
+import { logout } from '../store/slices/authSlice';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -12,10 +14,11 @@ const api: AxiosInstance = axios.create({
   },
 });
 
+let isHandlingUnauthorized = false;
+
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
-    // Add auth token if available
     const token = TokenManager.getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -33,12 +36,19 @@ api.interceptors.response.use(
     return response;
   },
   (error: AxiosError) => {
-    if (error.response?.status === 401) {
-      // Unauthorized - clear auth and redirect to login
-      TokenManager.clearAuth();
-      // Force page reload to trigger auth reinitialization
-      window.location.href = '/login';
+    const isAuthEndpoint = error.config?.url?.includes('/auth/login');
+
+    if (error.response?.status === 401 && !isAuthEndpoint && !isHandlingUnauthorized) {
+      isHandlingUnauthorized = true;
+      store.dispatch(logout());
+
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      } else {
+        isHandlingUnauthorized = false;
+      }
     }
+
     return Promise.reject(error);
   }
 );

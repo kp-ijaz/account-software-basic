@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import authReducer from './slices/authSlice';
+import { authSyncMiddleware } from './middleware/authSyncMiddleware';
 import incomeReducer from './slices/incomeSlice';
 import expenseReducer from './slices/expenseSlice';
 import dayBookReducer from './slices/dayBookSlice';
@@ -12,13 +13,13 @@ import auditReducer from './slices/auditSlice';
 import settingsReducer from './slices/settingsSlice';
 import categoryReducer from './slices/categorySlice';
 
-const persistConfig = {
-  key: 'root',
+const authPersistConfig = {
+  key: 'auth',
   storage,
-  whitelist: ['auth'],
+  blacklist: ['loading', 'isInitialized', 'error'],
 };
 
-const persistedAuthReducer = persistReducer(persistConfig, authReducer);
+const persistedAuthReducer = persistReducer(authPersistConfig, authReducer);
 
 export const store = configureStore({
   reducer: {
@@ -36,9 +37,9 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: ['persist/PERSIST'],
+        ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
       },
-    }),
+    }).concat(authSyncMiddleware),
 });
 
 export const persistor = persistStore(store);

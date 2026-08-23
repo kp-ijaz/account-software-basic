@@ -22,7 +22,6 @@ import Layout from './components/common/Layout';
 import MobileLayout from './components/mobile/MobileLayout';
 import PWAPrompt from './components/pwa/PWAPrompt';
 
-// Responsive Layout Wrapper
 const ResponsiveLayout = ({ children, title }: { children: React.ReactNode; title?: string }) => {
   const muiTheme = useTheme();
   const isMobile = useMediaQuery(muiTheme.breakpoints.down('md'));
@@ -34,28 +33,22 @@ const ResponsiveLayout = ({ children, title }: { children: React.ReactNode; titl
   return <Layout>{children}</Layout>;
 };
 
+const AppLoadingScreen = () => (
+  <ThemeProvider theme={theme}>
+    <CssBaseline />
+    <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+      <CircularProgress />
+    </Box>
+  </ThemeProvider>
+);
+
 function App() {
-  // Initialize auth state from localStorage on app load
   useAuthInit();
 
-  const { isAuthenticated, loading } = useSelector(
-    (state: RootState) => state.auth
-  );
+  const { isInitialized } = useSelector((state: RootState) => state.auth);
 
-  if (loading) {
-    return (
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Box
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          minHeight="100vh"
-        >
-          <CircularProgress />
-        </Box>
-      </ThemeProvider>
-    );
+  if (!isInitialized) {
+    return <AppLoadingScreen />;
   }
 
   return (
@@ -64,10 +57,8 @@ function App() {
       <PWAPrompt />
       <Router>
         <Routes>
-          {/* Public Routes */}
           <Route path="/login" element={<LoginPage />} />
 
-          {/* Protected Routes with Responsive Layout */}
           <Route
             path="/"
             element={
@@ -156,11 +147,7 @@ function App() {
             }
           />
 
-          {/* Fallback */}
-          <Route
-            path="*"
-            element={<Navigate to={isAuthenticated ? '/' : '/login'} replace />}
-          />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
     </ThemeProvider>

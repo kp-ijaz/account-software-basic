@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   Container,
   Box,
@@ -19,6 +19,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import authService from '../services/authService';
 import { setAuthenticated, setError as setAuthError } from '../store/slices/authSlice';
+import { RootState } from '../store';
 
 // Form validation schema
 const loginSchema = z.object({
@@ -30,10 +31,18 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
+  const { isAuthenticated, isInitialized } = useSelector((state: RootState) => state.auth);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+
+  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/';
+
+  if (isInitialized && isAuthenticated) {
+    return <Navigate to={from} replace />;
+  }
 
   const {
     register,
@@ -60,8 +69,8 @@ export default function LoginPage() {
           })
         );
 
-        // Navigate to dashboard
-        navigate('/');
+        // Navigate to the page the user was trying to access, or dashboard
+        navigate(from, { replace: true });
       } else {
         setError(response.message || 'Login failed');
       }

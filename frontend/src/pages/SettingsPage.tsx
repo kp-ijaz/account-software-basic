@@ -129,7 +129,7 @@ const SettingsPage: React.FC = () => {
 
   if (loading && !settings) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
         <CircularProgress />
       </Box>
     );

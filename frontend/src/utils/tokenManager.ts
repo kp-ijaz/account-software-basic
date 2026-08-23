@@ -73,7 +73,7 @@ export class TokenManager {
   }
 
   /**
-   * Check if token is expired
+   * Check if token is expired (actual expiry time has passed)
    */
   static isTokenExpired(token: string): boolean {
     try {
@@ -82,12 +82,25 @@ export class TokenManager {
         return true;
       }
 
-      // Check if token expires in the next 5 minutes
       const expiryTime = decoded.exp * 1000;
-      const currentTime = new Date().getTime();
-      const timeUntilExpiry = expiryTime - currentTime;
+      return Date.now() >= expiryTime;
+    } catch {
+      return true;
+    }
+  }
 
-      // If expires in less than 5 minutes, consider it expired
+  /**
+   * Check if token should be refreshed soon (expires within 5 minutes)
+   */
+  static shouldRefreshToken(token: string): boolean {
+    try {
+      const decoded = this.decodeToken(token);
+      if (!decoded || !decoded.exp) {
+        return true;
+      }
+
+      const expiryTime = decoded.exp * 1000;
+      const timeUntilExpiry = expiryTime - Date.now();
       return timeUntilExpiry < 5 * 60 * 1000;
     } catch {
       return true;

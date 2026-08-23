@@ -50,7 +50,7 @@ const DashboardPage: React.FC = () => {
 
   if (loading && !summary) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
         <CircularProgress />
       </Box>
     );
