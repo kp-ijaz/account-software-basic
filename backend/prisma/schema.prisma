@@ -29,19 +29,22 @@ model User {
 
 // Madrasa Settings
 model Settings {
-  id                String    @id @default(cuid())
-  madrasaName       String    @default("Madrasa")
-  logo              String?   // URL or base64
-  address           String?
-  phone             String?
-  email             String?
-  currency          String    @default("INR")
-  currencySymbol    String    @default("₹")
-  financialYearStart Int      @default(1)  // 1-12 (month)
-  openingBalance    Decimal   @db.Decimal(15, 2) @default(0)
-
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  id                 String    @id @default(cuid())
+  madrasaName        String    @default("Madrasa")
+  logo               String?
+  address            String?
+  phone              String?
+  email              String?
+  currency           String    @default("INR")
+  currencySymbol     String    @default("₹")
+  financialYearStart Int       @default(1)
+  financialYearEnd   Int       @default(12)
+  website            String?
+  taxId              String?
+  registrationNumber String?
+  openingBalance     Decimal   @db.Decimal(15, 2) @default(0)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 }
 
 // Income Category

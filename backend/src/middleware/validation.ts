@@ -94,8 +94,11 @@ export const sanitizeInput = (req: Request, res: Response, next: NextFunction) =
 
 function sanitizeObject(obj: any): void {
   for (const key in obj) {
+    if (key === 'logo' && typeof obj[key] === 'string') {
+      continue;
+    }
+
     if (typeof obj[key] === 'string') {
-      // Remove HTML/script tags
       obj[key] = obj[key]
         .replace(/[<>]/g, '')
         .replace(/javascript:/gi, '')

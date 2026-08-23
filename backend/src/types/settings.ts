@@ -6,7 +6,12 @@ export interface MadrasaSettings {
   phone: string;
   email: string;
   currency: string;
-  financialYearStart: number; // Month (1-12)
+  currencySymbol: string;
+  financialYearStart: number;
+  financialYearEnd: number;
+  website?: string;
+  taxId?: string;
+  registrationNumber?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -18,6 +23,10 @@ export interface SettingsUpdateRequest {
   email?: string;
   currency?: string;
   financialYearStart?: number;
+  financialYearEnd?: number;
+  website?: string;
+  taxId?: string;
+  registrationNumber?: string;
 }
 
 export interface SettingsResponse {
@@ -28,19 +37,4 @@ export interface SettingsResponse {
 
 export const SUPPORTED_CURRENCIES = [
   { code: 'INR', symbol: '₹', name: 'Indian Rupee' },
-] as const;
-
-export const MONTHS = [
-  { value: 1, name: 'January' },
-  { value: 2, name: 'February' },
-  { value: 3, name: 'March' },
-  { value: 4, name: 'April' },
-  { value: 5, name: 'May' },
-  { value: 6, name: 'June' },
-  { value: 7, name: 'July' },
-  { value: 8, name: 'August' },
-  { value: 9, name: 'September' },
-  { value: 10, name: 'October' },
-  { value: 11, name: 'November' },
-  { value: 12, name: 'December' },
 ] as const;

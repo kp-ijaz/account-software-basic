@@ -22,6 +22,8 @@ const settingsSlice = createSlice({
 
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
+      state.loading = false;
+      state.saveLoading = false;
     },
 
     setSettings: (state, action: PayloadAction<MadrasaSettings>) => {

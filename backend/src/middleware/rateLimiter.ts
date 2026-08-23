@@ -36,4 +36,5 @@ export const uploadLimiter = rateLimit({
   message: 'Too many upload attempts, please try again after 1 hour',
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => process.env.NODE_ENV === 'development',
 });

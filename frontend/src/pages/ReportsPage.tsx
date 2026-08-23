@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Container,
@@ -33,8 +33,13 @@ import MonthlyReportView from '../components/reports/MonthlyReportView';
 import YearlyReportView from '../components/reports/YearlyReportView';
 import BalanceSheetView from '../components/reports/BalanceSheetView';
 import {
-  printReport,
-  downloadReportPDF,
+  downloadMonthlyReportPDF,
+  downloadYearlyReportPDF,
+  downloadBalanceSheetPDF,
+  printReportHtml,
+  monthlyReportPrintHtml,
+  yearlyReportPrintHtml,
+  balanceSheetPrintHtml,
   getMonthlyReportFilename,
   getYearlyReportFilename,
   getBalanceSheetFilename,
@@ -58,7 +63,6 @@ const ReportsPage: React.FC = () => {
   const [tabValue, setTabValue] = useState(0);
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
-  const reportRef = useRef<HTMLDivElement>(null);
   const currentYear = new Date().getFullYear();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -142,8 +146,7 @@ const ReportsPage: React.FC = () => {
 
   const handlePrint = async () => {
     const { title, hasData } = getActiveReportMeta();
-
-    if (!hasData || !reportRef.current) {
+    if (!hasData) {
       setExportError('Report data is not ready yet. Please wait for it to load.');
       return;
     }
@@ -151,7 +154,14 @@ const ReportsPage: React.FC = () => {
     try {
       setExporting(true);
       setExportError(null);
-      await printReport(reportRef.current, title);
+
+      if (tabValue === 0 && monthlyReport) {
+        await printReportHtml(monthlyReportPrintHtml(monthlyReport), title);
+      } else if (tabValue === 1 && yearlyReport) {
+        await printReportHtml(yearlyReportPrintHtml(yearlyReport), title);
+      } else if (tabValue === 2 && balanceSheet) {
+        await printReportHtml(balanceSheetPrintHtml(balanceSheet), title);
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to print report';
       setExportError(message);
@@ -162,8 +172,7 @@ const ReportsPage: React.FC = () => {
 
   const handleDownloadPDF = async () => {
     const { filename, hasData } = getActiveReportMeta();
-
-    if (!hasData || !reportRef.current) {
+    if (!hasData) {
       setExportError('Report data is not ready yet. Please wait for it to load.');
       return;
     }
@@ -171,7 +180,14 @@ const ReportsPage: React.FC = () => {
     try {
       setExporting(true);
       setExportError(null);
-      await downloadReportPDF(reportRef.current, filename);
+
+      if (tabValue === 0 && monthlyReport) {
+        downloadMonthlyReportPDF(monthlyReport, filename);
+      } else if (tabValue === 1 && yearlyReport) {
+        downloadYearlyReportPDF(yearlyReport, filename);
+      } else if (tabValue === 2 && balanceSheet) {
+        downloadBalanceSheetPDF(balanceSheet, filename);
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to download PDF';
       setExportError(message);
@@ -322,7 +338,7 @@ const ReportsPage: React.FC = () => {
               <CircularProgress />
             </Box>
           ) : monthlyReport ? (
-            <Box ref={reportRef} id="report-print-content" className="report-print-content">
+            <Box className="report-print-content">
               <MonthlyReportView report={monthlyReport} />
             </Box>
           ) : null}
@@ -357,7 +373,7 @@ const ReportsPage: React.FC = () => {
               <CircularProgress />
             </Box>
           ) : yearlyReport ? (
-            <Box ref={reportRef} id="report-print-content" className="report-print-content">
+            <Box className="report-print-content">
               <YearlyReportView report={yearlyReport} />
             </Box>
           ) : null}
@@ -375,7 +391,7 @@ const ReportsPage: React.FC = () => {
               <CircularProgress />
             </Box>
           ) : balanceSheet ? (
-            <Box ref={reportRef} id="report-print-content" className="report-print-content">
+            <Box className="report-print-content">
               <BalanceSheetView balanceSheet={balanceSheet} />
             </Box>
           ) : null}

@@ -18,12 +18,11 @@ export const getSettings = async (req: Request, res: Response, next: NextFunctio
 export const updateSettings = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data: SettingsUpdateRequest = req.body;
-
     const settings = await settingsService.updateSettings(data);
 
     res.json({
       success: true,
-      message: 'Settings updated successfully',
+      message: 'Settings saved successfully',
       data: settings,
     });
   } catch (error) {
@@ -31,17 +30,14 @@ export const updateSettings = async (req: Request, res: Response, next: NextFunc
   }
 };
 
-export const uploadLogo = async (req: any, res: Response, next: NextFunction) => {
+export const uploadLogo = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    if (!req.file) {
-      throw new ApiError(400, 'No file uploaded');
+    const logo = req.body?.logo as string | undefined;
+    if (!logo) {
+      throw new ApiError(400, 'Please choose an image to upload');
     }
 
-    // In a real application, you would handle file storage
-    // For now, we'll just save the filename
-    const logoPath = `/uploads/logo/${req.file.filename}`;
-
-    const settings = await settingsService.updateLogo(logoPath);
+    const settings = await settingsService.updateLogo(logo);
 
     res.json({
       success: true,

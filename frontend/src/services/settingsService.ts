@@ -24,19 +24,22 @@ class SettingsService {
 
   async uploadLogo(file: File): Promise<MadrasaSettings> {
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const response = await api.post<SettingsResponse>('/settings/logo', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const logo = await this.fileToDataUrl(file);
+      const response = await api.post<SettingsResponse>('/settings/logo', { logo });
       return response.data.data;
     } catch (error: any) {
       const message = error.response?.data?.message || 'Failed to upload logo';
       throw new Error(message);
     }
+  }
+
+  private fileToDataUrl(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = () => reject(new Error('Could not read the selected image'));
+      reader.readAsDataURL(file);
+    });
   }
 }
 

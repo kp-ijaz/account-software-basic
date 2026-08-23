@@ -23,7 +23,13 @@ interface MonthlyReportViewProps {
 const MonthlyReportView: React.FC<MonthlyReportViewProps> = ({ report }) => {
   const formatCurrency = (amount: number) => formatINR(amount);
 
-  const { summary, transactions, incomeByCategory, expenseByCategory } = report;
+  const extra = report as {
+    incomeByCategory?: { category: string; amount: number }[];
+    expenseByCategory?: { category: string; amount: number }[];
+  };
+  const { summary, transactions } = report;
+  const incomeByCategory = report.incomeByCategory || extra.incomeByCategory || [];
+  const expenseByCategory = report.expenseByCategory || extra.expenseByCategory || [];
 
   return (
     <Box>

@@ -6,6 +6,7 @@ export interface MadrasaSettings {
   phone: string;
   email: string;
   currency: string;
+  currencySymbol?: string;
   financialYearStart: number;
   financialYearEnd: number;
   website?: string;

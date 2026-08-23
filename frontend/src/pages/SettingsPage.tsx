@@ -14,8 +14,6 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Card,
-  CardContent,
   SelectChangeEvent,
 } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
@@ -30,6 +28,7 @@ const SettingsPage: React.FC = () => {
     (state: RootState) => state.settings
   );
 
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     madrasaName: '',
     address: '',
@@ -42,7 +41,6 @@ const SettingsPage: React.FC = () => {
     taxId: '',
     registrationNumber: '',
   });
-
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   useEffect(() => {
@@ -50,22 +48,23 @@ const SettingsPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (settings) {
-      setFormData({
-        madrasaName: settings.madrasaName,
-        address: settings.address,
-        phone: settings.phone,
-        email: settings.email,
-        currency: settings.currency,
-        financialYearStart: settings.financialYearStart,
-        financialYearEnd: settings.financialYearEnd,
-        website: settings.website || '',
-        taxId: settings.taxId || '',
-        registrationNumber: settings.registrationNumber || '',
-      });
-      if (settings.logo) {
-        setLogoPreview(settings.logo);
-      }
+    if (!settings) return;
+
+    setFormData({
+      madrasaName: settings.madrasaName || '',
+      address: settings.address || '',
+      phone: settings.phone || '',
+      email: settings.email || '',
+      currency: settings.currency || 'INR',
+      financialYearStart: settings.financialYearStart || 1,
+      financialYearEnd: settings.financialYearEnd || 12,
+      website: settings.website || '',
+      taxId: settings.taxId || '',
+      registrationNumber: settings.registrationNumber || '',
+    });
+
+    if (settings.logo) {
+      setLogoPreview(settings.logo);
     }
   }, [settings]);
 
@@ -73,40 +72,48 @@ const SettingsPage: React.FC = () => {
     try {
       dispatch(setLoading(true));
       dispatch(clearError());
-      const response = await settingsService.getSettings();
-      dispatch(setSettings(response));
+      const data = await settingsService.getSettings();
+      dispatch(setSettings(data));
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to load settings';
       dispatch(setError(message));
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | { name?: string; value?: unknown }> | SelectChangeEvent<any>) => {
-    const target = e.target as any;
-    const { name, value } = target;
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<unknown>
+  ) => {
+    const { name, value } = e.target as { name: string; value: string };
     setFormData((prev) => ({
       ...prev,
-      [name]: name === 'financialYearStart' || name === 'financialYearEnd' ? parseInt(value) : value,
+      [name]: name === 'financialYearStart' || name === 'financialYearEnd' ? Number(value) : value,
     }));
   };
 
   const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = '';
     if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      dispatch(setError('Please choose a PNG, JPG, or GIF image'));
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      dispatch(setError('Logo must be smaller than 2MB'));
+      return;
+    }
 
     try {
       dispatch(setSaveLoading(true));
       dispatch(clearError());
+      setSuccessMessage(null);
 
-      const response = await settingsService.uploadLogo(file);
-      dispatch(setSettings(response));
-
-      // Show preview
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setLogoPreview(event.target?.result as string);
-      };
-      reader.readAsDataURL(file);
+      const data = await settingsService.uploadLogo(file);
+      dispatch(setSettings(data));
+      setLogoPreview(data.logo || URL.createObjectURL(file));
+      setSuccessMessage('Logo uploaded successfully');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to upload logo';
       dispatch(setError(message));
@@ -114,13 +121,31 @@ const SettingsPage: React.FC = () => {
   };
 
   const handleSave = async () => {
+    if (!formData.madrasaName.trim()) {
+      dispatch(setError('Madrasa name is required'));
+      return;
+    }
+
     try {
       dispatch(setSaveLoading(true));
       dispatch(clearError());
+      setSuccessMessage(null);
 
-      const response = await settingsService.updateSettings(formData);
-      dispatch(setSettings(response));
-      dispatch(setError(null));
+      const data = await settingsService.updateSettings({
+        madrasaName: formData.madrasaName.trim(),
+        address: formData.address.trim(),
+        phone: formData.phone.trim(),
+        email: formData.email.trim(),
+        currency: formData.currency,
+        financialYearStart: formData.financialYearStart,
+        financialYearEnd: formData.financialYearEnd,
+        website: formData.website.trim(),
+        taxId: formData.taxId.trim(),
+        registrationNumber: formData.registrationNumber.trim(),
+      });
+
+      dispatch(setSettings(data));
+      setSuccessMessage('Settings saved successfully');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to save settings';
       dispatch(setError(message));
@@ -147,13 +172,18 @@ const SettingsPage: React.FC = () => {
       </Box>
 
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
+        <Alert severity="error" sx={{ mb: 2 }} onClose={() => dispatch(clearError())}>
           {error}
         </Alert>
       )}
 
+      {successMessage && (
+        <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccessMessage(null)}>
+          {successMessage}
+        </Alert>
+      )}
+
       <Grid container spacing={3}>
-        {/* Logo Upload */}
         <Grid item xs={12} md={4}>
           <Paper sx={{ p: 3, textAlign: 'center' }}>
             <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
@@ -164,30 +194,19 @@ const SettingsPage: React.FC = () => {
                 component="img"
                 src={logoPreview}
                 alt="Logo preview"
-                sx={{ maxWidth: '100%', maxHeight: 150, mb: 2 }}
+                sx={{ maxWidth: '100%', maxHeight: 150, mb: 2, objectFit: 'contain' }}
               />
             )}
-            <Button
-              variant="outlined"
-              component="label"
-              fullWidth
-              disabled={saveLoading}
-            >
-              Upload Logo
-              <input
-                type="file"
-                accept="image/*"
-                hidden
-                onChange={handleLogoChange}
-              />
+            <Button variant="outlined" component="label" fullWidth disabled={saveLoading}>
+              {saveLoading ? 'Uploading...' : 'Upload Logo'}
+              <input type="file" accept="image/png,image/jpeg,image/gif,image/webp" hidden onChange={handleLogoChange} />
             </Button>
             <Typography variant="caption" color="textSecondary" sx={{ mt: 1, display: 'block' }}>
-              PNG, JPG or GIF (max 2MB)
+              PNG, JPG, GIF or WEBP (max 2MB)
             </Typography>
           </Paper>
         </Grid>
 
-        {/* Settings Form */}
         <Grid item xs={12} md={8}>
           <Paper sx={{ p: 3 }}>
             <Grid container spacing={2}>
@@ -338,7 +357,7 @@ const SettingsPage: React.FC = () => {
                 <Button
                   variant="contained"
                   color="primary"
-                  startIcon={<SaveIcon />}
+                  startIcon={saveLoading ? <CircularProgress size={18} color="inherit" /> : <SaveIcon />}
                   onClick={handleSave}
                   disabled={saveLoading}
                   fullWidth
@@ -352,7 +371,6 @@ const SettingsPage: React.FC = () => {
         </Grid>
       </Grid>
 
-      {/* Last Updated Info */}
       {settings && (
         <Box sx={{ mt: 3, p: 2, backgroundColor: '#f5f5f5', borderRadius: 1 }}>
           <Typography variant="caption" color="textSecondary">
